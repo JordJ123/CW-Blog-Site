@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PostController;
 
 /*
 |--------------------------------------------------------------------------
@@ -13,12 +14,20 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
+//Base
 Route::get('/', function () {
     return view('welcome');
 });
-
 Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth'])->name('dashboard');
-
 require __DIR__.'/auth.php';
+
+//Posts
+Route::redirect('/dashboard', '/posts');
+Route::get('/posts', [PostController::class, 'index'])
+    ->middleware(['auth'])->name('posts.index');
+
+//Comments
+Route::post('/comments', [CommentController::class, 'store'])
+    ->middleware(['auth'])->name('comments.store');
