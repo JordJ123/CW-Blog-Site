@@ -19,7 +19,7 @@
             @endforeach
             <form method="POST" action="{{ route('comments.store') }}">
                     @csrf
-                    <p>Text: <input type="type" name="text"
+                    <p>Comment: <input type="type" name="text"
                         value="{{ old('name') }}"></p>
                     <input type="hidden" name="post_id" value="{{ $post->id }}">
                     <input type="submit" value="Send">

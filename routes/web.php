@@ -17,6 +17,9 @@ use App\Http\Controllers\CommentController;
 
 //Base
 Route::get('/', function () {
+    if (auth()->check()) {
+        return redirect('/posts');
+    }
     return view('welcome');
 });
 Route::get('/dashboard', function () {
