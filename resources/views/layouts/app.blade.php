@@ -8,6 +8,10 @@
     <body>
         <div>
             <h1>@yield('title')</h1>
+            <form method="POST" action="{{ route('logout') }}">
+                @csrf
+                <input type="submit" value="Logout">
+            </form>
         </div>
         <div>
             @yield('content')    

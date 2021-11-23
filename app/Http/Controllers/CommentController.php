@@ -38,13 +38,12 @@ class CommentController extends Controller
 
         $validatedData = $request->validate([
             'text' => 'required|max:255',
-            'user_id' => 'required|integer',
             'post_id' => 'required|integer',
         ]);
 
         $comment = new Comment;
         $comment->text = $validatedData['text'];
-        $comment->user_id = $validatedData['user_id'];
+        $comment->user_id = auth()->user()->id;
         $comment->post_id = $validatedData['post_id'];
         $comment->save();
 
