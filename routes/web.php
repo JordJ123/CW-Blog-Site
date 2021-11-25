@@ -17,15 +17,9 @@ use App\Http\Controllers\CommentController;
 
 //Base
 Route::get('/', function () {
-    if (auth()->check()) {
-        return redirect('/posts');
-    }
     return view('welcome');
-});
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth'])->name('dashboard');
-require __DIR__.'/auth.php';
+})->middleware(['guest'])->name('home');
+
 
 //Posts
 Route::redirect('/dashboard', '/posts');
@@ -35,3 +29,5 @@ Route::get('/posts', [PostController::class, 'index'])
 //Comments
 Route::post('/comments', [CommentController::class, 'store'])
     ->middleware(['auth'])->name('comments.store');
+
+require __DIR__.'/auth.php';
