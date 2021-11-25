@@ -3,7 +3,8 @@
 @section('title', 'Feed')
 
 @section('content')
-    @foreach ($posts as $post)
+
+    @foreach ($posts->reverse() as $post)
         <div>
             <p><b>
                 {{ $post->user()->first()->name }}
@@ -19,11 +20,20 @@
             @endforeach
             <form method="POST" action="{{ route('comments.store') }}">
                     @csrf
-                    <p>Comment: <input type="type" name="text"
-                        value="{{ old('name') }}"></p>
+                    Comment: <input type="type" name="text"
+                        value="{{ old('name') }}">
                     <input type="hidden" name="post_id" value="{{ $post->id }}">
                     <input type="submit" value="Send">
             </form>
         </div>
     @endforeach
+
+    <div>
+        <br>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <input type="submit" value="Logout">
+        </form>
+    </div>
+
 @endsection
