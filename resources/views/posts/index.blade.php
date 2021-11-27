@@ -11,8 +11,11 @@
             <p><b>
                 {{ $post->user()->first()->name }}
                 (Likes {{ $post->likes()->count() }})
+                @if ($post->user()->first() == auth()->user())
+                    <a href="{{ route('posts.edit') }}">Edit</a>
+                @endif    
             </b><p>
-            <p>{{ $post->text }}</p>
+            <p> {{ $post->text }}</p>
             @foreach ($post->comments()->get() as $comment)
                 <p>
                     {{ $comment->user()->first()->name }}
@@ -21,11 +24,11 @@
                 </p>                    
             @endforeach
             <form method="POST" action="{{ route('comments.store') }}">
-                    @csrf
-                    Comment: <input type="type" name="text"
-                        value="{{ old('name') }}">
-                    <input type="hidden" name="post_id" value="{{ $post->id }}">
-                    <input type="submit" value="Send">
+                @csrf
+                Comment: <input type="type" name="text"
+                    value="{{ old('name') }}">
+                <input type="hidden" name="post_id" value="{{ $post->id }}">
+                <input type="submit" value="Send">
             </form>
         </div>
     @endforeach

@@ -5,8 +5,9 @@
 @section('content')
     <form name="create" method="POST" action="{{ route('posts.store') }}">
         @csrf
-        <textarea name="comment" form="create" name="text" value="{{ old('text') }}">
-            </textarea><br>
-        <input type="submit" value="Send">
+        <input type="text" name="text"><br><br>
+        <input type="submit" value="Send"><br><br>
     </form>
+    <a href="{{ route('posts.index') }}">Cancel</a>
 @endsection
+

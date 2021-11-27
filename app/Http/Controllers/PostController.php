@@ -36,7 +36,17 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        
+        $validatedData = $request->validate([
+            'text' => 'required|max:255',
+        ]);
+
+        $post = new Post;
+        $post->text = $validatedData['text'];
+        $post->user_id = auth()->user()->id;
+        $post->save();
+
+        return redirect()->route('posts.index');
     }
 
     /**
