@@ -25,6 +25,10 @@ Route::get('/', function () {
 Route::redirect('/dashboard', '/posts');
 Route::get('/posts', [PostController::class, 'index'])
     ->middleware(['auth'])->name('posts.index');
+Route::get('/posts/create', [PostController::class, 'create'])
+    ->middleware(['auth'])->name('posts.create');
+Route::post('/posts/store', [PostController::class, 'store'])
+    ->middleware(['auth'])->name('posts.store');
 
 //Comments
 Route::post('/comments', [CommentController::class, 'store'])
