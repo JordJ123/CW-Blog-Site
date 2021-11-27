@@ -4,6 +4,8 @@
 
 @section('content')
 
+    <a href="{{ route('posts.create') }}">New Post</a>
+
     @foreach ($posts->reverse() as $post)
         <div>
             <p><b>
