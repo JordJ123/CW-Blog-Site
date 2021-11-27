@@ -36,7 +36,6 @@ class PostController extends Controller
      */
     public function store(Request $request)
     {
-        
         $validatedData = $request->validate([
             'text' => 'required|max:255',
         ]);
@@ -68,7 +67,8 @@ class PostController extends Controller
      */
     public function edit($id)
     {
-        //
+        $post = Post::findOrFail($id);
+        return view('posts.edit', ['post' => $post]);
     }
 
     /**
@@ -80,7 +80,15 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $validatedData = $request->validate([
+            'text' => 'required|max:255',
+        ]);
+
+        $post = Post::findOrFail($id);
+        $post->text = $validatedData['text'];
+        $post->save();
+
+        return redirect()->route('posts.index');
     }
 
     /**

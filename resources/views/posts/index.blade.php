@@ -12,7 +12,7 @@
                 {{ $post->user()->first()->name }}
                 (Likes {{ $post->likes()->count() }})
                 @if ($post->user()->first() == auth()->user())
-                    <a href="{{ route('posts.edit') }}">Edit</a>
+                    <a href="{{ route('posts.edit', ['id' => $post->id]) }}">Edit</a>
                 @endif    
             </b><p>
             <p> {{ $post->text }}</p>
@@ -21,6 +21,9 @@
                     {{ $comment->user()->first()->name }}
                     (Likes {{ $comment->likes()->count() }}): 
                     {{ $comment->text }}
+                    @if ($comment->user()->first() == auth()->user())
+                        <a href="">Edit</a>
+                    @endif 
                 </p>                    
             @endforeach
             <form method="POST" action="{{ route('comments.store') }}">
