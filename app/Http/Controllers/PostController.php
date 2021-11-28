@@ -12,10 +12,16 @@ class PostController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         $posts = Post::all();
-        return view('posts.index', ['posts' => $posts]);
+        if ($request['page'] && ($request['page'] * 5) <= ($posts->count() + 4)) {
+            $page = $request['page'];
+            return view('posts.index', 
+                ['posts' => $posts, 'page' => $page]);
+        } else {
+            return redirect()->route('posts.index', ['page' => 1]);
+        }
     }
 
     /**

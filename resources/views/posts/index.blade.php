@@ -6,8 +6,14 @@
 
     <a href="{{ route('posts.create') }}">New Post</a>
 
-    @foreach ($posts->reverse() as $post)
+    @php
+        $end = min($page * 5, $posts->count());
+    @endphp
+    @for ($i = (($page - 1) * 5); $i < $end; $i++)
         <div>
+            @php
+                $post = $posts->reverse()->values()[$i];
+            @endphp
             <p><b>
                 {{ $post->user()->first()->name }}
                 (Likes {{ $post->likes()->count() }})
@@ -34,7 +40,7 @@
                 <input type="submit" value="Send">
             </form>
         </div>
-    @endforeach
+    @endfor
 
     <div>
         <br>
@@ -43,5 +49,26 @@
             <input type="submit" value="Logout">
         </form>
     </div>
+
+    <div style="text-align:center">
+        @php
+            $start = max (1, $page - 4);
+            $end = min (ceil($posts->count() / 5), $page + 4)
+        @endphp
+        @if ($page != 1)
+            <a href="{{ route('posts.index', ['page' => $page - 1]) }}">Previous</a>
+        @endif
+        @for ($i = $start; $i <= $end; $i++)
+            @if ($page != $i)
+                <a href="{{ route('posts.index', ['page' => $i]) }}">{{ $i }}</a>
+            @else
+                <b> {{ $i }} </b>
+            @endif    
+        @endfor
+        @if ($page != ceil($posts->count() / 5))
+            <a href="{{ route('posts.index', ['page' => $page + 1]) }}">Next</a>
+        @endif
+    </div>  
+
 
 @endsection
