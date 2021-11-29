@@ -20,21 +20,31 @@
                     $alreadyLiked = true;
                     break;
                 @endif
-            @endforeach    
+            @endforeach
             <p><b>
                 {{ $post->user()->first()->name }}
                 (Likes {{ $post->likes()->count() }})
+                @if ($post->user()->first() == auth()->user())
+                    <a href="{{ route('posts.edit', ['id' => $post->id]) }}">Edit</a>
+                @endif   
                 @if ($alreadyLiked) {
                     <a href="">Unlike</a>
                 @else
                     <a href="">Like</a>
-                @endif
-                @if ($post->user()->first() == auth()->user())
-                    <a href="{{ route('posts.edit', ['id' => $post->id]) }}">Edit</a>
-                @endif    
+                @endif 
             </b><p>
             <p> {{ $post->text }}</p>
             @foreach ($post->comments()->get() as $comment)
+                @php
+                    $post = $posts->reverse()->values()[$i];
+                    $commentLiked = false;
+                @endphp
+                @foreach($comment->likes() as $user)
+                    @if ($user == auth()->user())
+                        $commentLiked = true;
+                        break;
+                    @endif
+                @endforeach
                 <p>
                     {{ $comment->user()->first()->name }}
                     (Likes {{ $comment->likes()->count() }}): 
@@ -42,6 +52,11 @@
                     @if ($comment->user()->first() == auth()->user())
                         <a href="">Edit</a>
                     @endif 
+                    @if ($alreadyLiked) {
+                        <a href="">Unlike</a>
+                    @else
+                        <a href="">Like</a>
+                    @endif
                 </p>                    
             @endforeach
             <form method="POST" action="{{ route('comments.store') }}">
