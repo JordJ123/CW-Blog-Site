@@ -13,10 +13,22 @@
         <div>
             @php
                 $post = $posts->reverse()->values()[$i];
+                $alreadyLiked = false;
             @endphp
+            @foreach($post->likes() as $user)
+                @if ($user == auth()->user())
+                    $alreadyLiked = true;
+                    break;
+                @endif
+            @endforeach    
             <p><b>
                 {{ $post->user()->first()->name }}
                 (Likes {{ $post->likes()->count() }})
+                @if ($alreadyLiked) {
+                    <a href="{{ route('posts.edit', ['id' => $post->id]) }}">Unlike</a>
+                @else
+                    <a href="{{ route('posts.edit', ['id' => $post->id]) }}">Like</a>
+                @endif
                 @if ($post->user()->first() == auth()->user())
                     <a href="{{ route('posts.edit', ['id' => $post->id]) }}">Edit</a>
                 @endif    
