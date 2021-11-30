@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Post;
+use App\Models\User;
+use Faker\Factory;
 
 class PostTableSeeder extends Seeder
 {
@@ -50,5 +52,18 @@ class PostTableSeeder extends Seeder
         $jane->likes()->attach(4);
 
         $posts = Post::factory()->count(10)->create();
+        Post::all()->each(function ($post) {
+            $faker = Factory::create();
+            $liked = false;
+            while (!$liked) {
+                try {
+                    $post->likes()->attach($faker->randomElement(
+                        User::pluck('id')->toArray()));
+                        $liked = true;
+                } catch (QueryException $error) {
+                    //User has already liked post
+                }
+            }
+        });
     }
 }

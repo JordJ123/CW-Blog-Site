@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
 use App\Models\Comment;
+use App\Models\User;
+use Faker\Factory;
 
 class CommentTableSeeder extends Seeder
 {
@@ -55,5 +57,18 @@ class CommentTableSeeder extends Seeder
         $jane->likes()->attach(4);
 
         $comments = Comment::factory()->count(10)->create();
+        Comment::all()->each(function ($comment) {
+            $faker = Factory::create();
+            $liked = false;
+            while (!$liked) {
+                try {
+                    $comment->likes()->attach($faker->randomElement(
+                        User::pluck('id')->toArray()));
+                        $liked = true;
+                } catch (QueryException $error) {
+                    //User has already liked comment
+                }
+            }
+        });
     }
 }

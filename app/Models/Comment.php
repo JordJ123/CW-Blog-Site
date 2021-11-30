@@ -18,7 +18,7 @@ class Comment extends Model
     }
 
     public function likes() {
-        return $this->belongsToMany('App\Models\User', "comment_likes");
+        return $this->morphToMany(User::class, "likeable");
     }
     
 }
