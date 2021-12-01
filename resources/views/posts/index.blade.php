@@ -33,6 +33,12 @@
                     <a href="">Like</a>
                 @endif 
             </b><p>
+            @if ($post->image()->first() != null)
+                <p><img 
+                    src="{{ 'images/'.$post->image()->first()->path }}" 
+                    alt="{{ $post->image()->first()->text }}" 
+                    style="height:128px"/></p>
+            @endif
             <p> {{ $post->text }}</p>
             @foreach ($post->comments()->get() as $comment)
                 @php
@@ -92,7 +98,7 @@
                 <b> {{ $i }} </b>
             @endif    
         @endfor
-        @if ($page != ceil($posts->count() / 5))
+        @if ($page != ceil($posts->count() / 5) && $posts->count() != 0)
             <a href="{{ route('posts.index', ['page' => $page + 1]) }}">Next</a>
         @endif
     </div>  

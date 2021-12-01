@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Post;
+use App\Models\Image;
 
 class PostController extends Controller
 {
@@ -15,7 +16,8 @@ class PostController extends Controller
     public function index(Request $request)
     {
         $posts = Post::all();
-        if ($request['page'] && ($request['page'] * 5) <= ($posts->count() + 4)) {
+        if ($request['page'] && ($request['page'] * 5) <= ($posts->count() + 4)
+            || $request['page'] && ($posts->count() == 0)) {
             $page = $request['page'];
             return view('posts.index', 
                 ['posts' => $posts, 'page' => $page]);
@@ -45,6 +47,19 @@ class PostController extends Controller
         $validatedData = $request->validate([
             'text' => 'required|max:255',
         ]);
+
+        if ($request->hasFile('file')) {
+            $imageData = $request->validate([
+                'image' => 'mimes:jpeg,bmp,png',
+                'imageText' => 'required|max:255',
+            ]);
+            $request->file->move(public_path('images'), $request->file->hashName());
+            $image = new Image;
+            $image->path = $request->file->hashName();
+            $image->text = $imageData['imageText'];
+            $image->post_id = auth()->user()->id;  
+            $image->save();
+        }
 
         $post = new Post;
         $post->text = $validatedData['text'];
