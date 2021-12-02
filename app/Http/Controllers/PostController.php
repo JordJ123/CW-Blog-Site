@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\User;
 use App\Models\Post;
 use App\Models\Image;
+use App\Classes\Email;
 
 class PostController extends Controller
 {
@@ -101,6 +103,7 @@ class PostController extends Controller
      */
     public function update(Request $request, $id)
     {
+
         $validatedData = $request->validate([
             'text' => 'required|max:255',
         ]);
@@ -108,6 +111,26 @@ class PostController extends Controller
         $post = Post::findOrFail($id);
         $post->text = $validatedData['text'];
         $post->save();
+
+        $sender = new User;
+        $sender->name = "Posts R Us";
+        $sender->email = "postsrus@email.com";
+        $subject = "Edited Post";
+        foreach ($post->likes()->get() as $recipent) {
+            if ($recipent != $post->user()) {
+                $email = new Email($sender, $recipent, $subject, 'emails.edited', 
+                ['resource' => $post, 'type' => "post", 'status' => "liked"]);
+                $email->send();
+            }
+        }
+        foreach ($post->comments()->get() as $comment) {
+            if ($comment->user()->first() != $post->user()->first()) {
+                $email = new Email($sender, $comment->user()->first(), $subject, 
+                'emails.edited', 
+                ['resource' => $post, 'type' => "post", 'status' => "commented on"]);
+                $email->send();
+            }    
+        }
 
         return redirect()->route('posts.index');
     }

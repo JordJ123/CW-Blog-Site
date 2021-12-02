@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\MailHandler;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
 
@@ -15,13 +16,13 @@ use App\Http\Controllers\CommentController;
 |
 */
 
-//Base
+//Routes - Home
 Route::get('/', function () {
     return view('welcome');
 })->middleware(['guest'])->name('home');
 
 
-//Posts
+//Routes - Posts
 Route::redirect('/dashboard', '/posts');
 Route::get('/posts', [PostController::class, 'index'])
     ->middleware(['auth'])->name('posts.index');
@@ -34,7 +35,7 @@ Route::post('/posts/store', [PostController::class, 'store'])
 Route::put('/posts/{id}', [PostController::class, 'update'])
     ->middleware(['auth'])->name('posts.update');
 
-//Comments
+//Routes - Comments
 Route::post('/comments', [CommentController::class, 'store'])
     ->middleware(['auth'])->name('comments.store');
 

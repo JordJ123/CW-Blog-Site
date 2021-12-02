@@ -3,7 +3,11 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Mail;
+use App\Models\User;
+use App\Models\Post;
 use App\Models\Comment;
+use App\Classes\Email;
 
 class CommentController extends Controller
 {
@@ -46,6 +50,15 @@ class CommentController extends Controller
         $comment->user_id = auth()->user()->id;
         $comment->post_id = $validatedData['post_id'];
         $comment->save();
+
+        $sender = new User;
+        $sender->name = "Posts R Us";
+        $sender->email = "postsrus@email.com";
+        $recipent = Post::findOrFail($comment->post_id)->user()->first();
+        $subject = "Posted Comment";
+        $email = new Email($sender, $recipent, 
+            $subject, 'emails.comment', ['comment' => $comment]);
+        $email->send();
 
         return redirect()->route('posts.index');
 
