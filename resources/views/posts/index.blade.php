@@ -26,12 +26,28 @@
                 (Likes {{ $post->likes()->count() }})
                 @if ($post->user()->first() == auth()->user())
                     <a href="{{ route('posts.edit', ['id' => $post->id]) }}">Edit</a>
+                    <form method="POST" action="{{ route('posts.destroy', 
+                        ['id' => $post->id]) }}">
+                        @csrf
+                        @method('DELETE')
+                        <input type="submit" value="Delete">
+                    </form>
                 @endif   
-                @if ($alreadyLiked) {
-                    <a href="">Unlike</a>
-                @else
-                    <a href="">Like</a>
-                @endif 
+                @if ($alreadyLiked)
+                        <form method="POST" action="{{ route('posts.updateLike', 
+                            ['id' => $post->id, 'like' => 'false']) }}">
+                            @csrf
+                            @method('PATCH')
+                            <input type="submit" value="Unlike">
+                        </form>
+                    @else
+                        <form method="POST" action="{{ route('posts.updateLike', 
+                            ['id' => $post->id, 'like' => 'true']) }}">
+                        @csrf
+                        @method('PATCH')
+                        <input type="submit" value="Like">
+                    </form>
+                @endif
             </b><p>
             @if ($post->image()->first() != null)
                 <p><img 
@@ -44,11 +60,13 @@
                 @php
                     $post = $posts->reverse()->values()[$i];
                     $commentLiked = false;
-                @endphp
-                @foreach($comment->likes() as $user)
-                    @if ($user == auth()->user())
-                        $commentLiked = true;
-                        break;
+                @endphp    
+                @foreach ($comment->likes()->get() as $user)
+                    @if ($user->id == auth()->user()->id)
+                        @php
+                            $commentLiked = true;
+                            break;                            
+                        @endphp    
                     @endif
                 @endforeach
                 <p>
@@ -56,12 +74,28 @@
                     (Likes {{ $comment->likes()->count() }}): 
                     {{ $comment->text }}
                     @if ($comment->user()->first() == auth()->user())
-                        <a href="">Edit</a>
+                        <a href="{{ route('comments.edit', ['id' => $comment->id]) }}">Edit</a>
+                        <form method="POST" action="{{ route('comments.destroy', 
+                            ['id' => $comment->id]) }}">
+                            @csrf
+                            @method('DELETE')
+                            <input type="submit" value="Delete">
+                        </form>
                     @endif 
-                    @if ($alreadyLiked) {
-                        <a href="">Unlike</a>
+                    @if ($commentLiked)
+                        <form method="POST" action="{{ route('comments.updateLike', 
+                            ['id' => $comment->id, 'like' => 'false']) }}">
+                            @csrf
+                            @method('PATCH')
+                            <input type="submit" value="Unlike">
+                        </form>
                     @else
-                        <a href="">Like</a>
+                        <form method="POST" action="{{ route('comments.updateLike', 
+                            ['id' => $comment->id, 'like' => 'true']) }}">
+                            @csrf
+                            @method('PATCH')
+                            <input type="submit" value="Like">
+                        </form>
                     @endif
                 </p>                    
             @endforeach
