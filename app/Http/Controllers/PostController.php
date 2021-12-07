@@ -30,6 +30,23 @@ class PostController extends Controller
     }
 
     /**
+     * Display a listing of the resource in json format.
+     *
+     * @return \Illuminate\Http\Response
+     */
+    public function indexJSON(Request $request)
+    {
+        $allPosts = Post::all();
+        $posts = array();
+        $end = min($request['page'] * 5, $allPosts->count());
+        for ($i = (($request['page'] - 1) * 5); $i < $end; $i++) {
+            array_push($posts, $allPosts->reverse()->values()[$i]);
+        }
+        return $posts;
+    }
+    
+
+    /**
      * Show the form for creating a new resource.
      *
      * @return \Illuminate\Http\Response
@@ -82,19 +99,6 @@ class PostController extends Controller
     public function show($id)
     {
         //
-    }
-
-    /**
-     * Display the specified resource's comments.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function showComments($id)
-    {
-        $post = Post::findOrFail($id);
-        $comments = $post->comments->all();
-        return $comments;
     }
 
     /**
@@ -170,7 +174,7 @@ class PostController extends Controller
         $sender->email = "postsrus@email.com";
         $subject = "Edited Post";
         foreach ($post->likes()->get() as $recipent) {
-            if ($recipent->id != $post->user()->id) {
+            if ($recipent->id != $post->user()->first()->id) {
                 $email = new Email($sender, $recipent, $subject, 'emails.edited', 
                 ['resource' => $post, 'type' => "post", 'status' => "liked"]);
                 $email->send();
@@ -218,7 +222,7 @@ class PostController extends Controller
             $email->send();
         }
 
-        return redirect()->route('posts.index');
+        return null;
 
     }
 
@@ -254,7 +258,7 @@ class PostController extends Controller
             }    
         }
 
-        return redirect()->route('posts.index');
+        return null;
 
     }
 

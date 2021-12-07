@@ -4,165 +4,155 @@
 
 @section('content')
 
-    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-
     <a href="{{ route('posts.create') }}">New Post</a>
     
 
     @php
         $end = min($page * 5, $posts->count());
     @endphp
-    @for ($i = (($page - 1) * 5); $i < $end; $i++)
-        <div id="post{{ $i }}">
-            @php
-                $post = $posts->reverse()->values()[$i];
-                $alreadyLiked = false;
-            @endphp
-            @foreach($post->likes() as $user)
-                @if ($user == auth()->user())
-                    $alreadyLiked = true;
-                    break;
-                @endif
-            @endforeach
+    <div v-for="post in posts">
             <p><b>
-                {{ $post->user()->first()->name }}
-                (Likes {{ $post->likes()->count() }})
-                @if ($post->user()->first() == auth()->user())
-                    <a href="{{ route('posts.edit', ['id' => $post->id]) }}">Edit</a>
-                    <form method="POST" action="{{ route('posts.destroy', 
-                        ['id' => $post->id]) }}">
-                        @csrf
-                        @method('DELETE')
-                        <input type="submit" value="Delete">
-                    </form>
-                @endif   
-                @if ($alreadyLiked)
-                        <form method="POST" action="{{ route('posts.updateLike', 
-                            ['id' => $post->id, 'like' => 'false']) }}">
-                            @csrf
-                            @method('PATCH')
-                            <input type="submit" value="Unlike">
-                        </form>
-                    @else
-                        <form method="POST" action="{{ route('posts.updateLike', 
-                            ['id' => $post->id, 'like' => 'true']) }}">
-                        @csrf
-                        @method('PATCH')
-                        <input type="submit" value="Like">
-                    </form>
-                @endif
+                @{{ post.name }}
+                (Likes @{{ post.likeCount }})
+                <button v-if="post.isUser" @click="postEdit(post)">Edit</button> 
+                <button v-if="post.isUser" @click="postRemove(post)">Delete</button>
+                <button v-if="!post.alreadyLiked" @click="postLike(post)">Like</button>
+                <button v-if="post.alreadyLiked" @click="postUnlike(post)">Unlike</button>   
             </b><p>
-            @if ($post->image()->first() != null)
-                <p><img 
-                    src="{{ 'images/'.$post->image()->first()->path }}" 
-                    alt="{{ $post->image()->first()->text }}" 
-                    style="height:128px"/></p>
-            @endif
-            <p> {{ $post->text }}</p>
-            <p v-for="comment in comments">
+            <p v-if="post.image != null"><img :src="'images/' + post.image.path" 
+                :alt="post.image.text" style="height:128px"/></p>
+            <p>@{{ post.text }}</p>
+            <p v-for="comment in post.comments">
                 @{{ comment.name }}
                 (Likes @{{ comment.likeCount }}): 
                 <label v-if="!comment.isEdited">@{{ comment.text }}</label>
                 <input v-model="comment.text" v-if="comment.isEdited" type="text"/>
-                <button v-if="comment.isEdited" @click="commentUpdate(comment)">
+                <button v-if="comment.isEdited" @click="commentUpdate(post, comment)">
                     Update</button>
                 <button v-if="comment.isEdited" 
-                    @click="commentCancel(comment)">Cancel</button>
+                    @click="commentCancel(post, comment)">Cancel</button>
                 <button v-if="comment.isUser && !comment.isEdited" 
-                    @click="commentEdit(comment)">Edit</button></a>
-                <button v-if="comment.isUser" @click="commentRemove(comment)">
+                    @click="commentEdit(post, comment)">Edit</button>
+                <button v-if="comment.isUser" @click="commentRemove(post, comment)">
                     Delete</button>
-                <button v-if="!comment.alreadyLiked" @click="commentLike(comment)">
+                <button v-if="!comment.alreadyLiked" @click="commentLike(post, comment)">
                     Like</button>
-                <button v-if="comment.alreadyLiked" @click="commentUnlike(comment)">
+                <button v-if="comment.alreadyLiked" @click="commentUnlike(post, comment)">
                     Unlike</button>   
             </p>
             <p>
-                <input v-model="commentBox" type="text"/>
-                <button @click="commentPost()">Send</button>
+                <input v-model="post.newComment" type="text"/>
+                <button @click="commentPost(post)">Send</button>
             </p>    
         </div>
+    </div>
 
-        <script>
-            var app = new Vue ({
-                el: "#post{{ $i }}",
-                data: {
-                    comments: [],
-                    tempComments: [],
-                    commentBox: ""
+    <script>
+        var app = new Vue ({
+            el: "#content",
+            data: {
+                posts: [],
+            },
+            mounted() {
+                axios.get("{{ route('posts.indexJSON', ['page' => $page]) }}")
+                    .then(response => {
+                        this.posts = response.data;
+                        this.tempPosts = JSON.parse(JSON.stringify(this.posts))
+                    })
+                    .catch(response => {console.log(response)});
+            },
+            methods: {
+                postEdit:function(post) {
+                    window.location.href 
+                        = "{{ route('posts.index') }}/" + post.id + "/edit";
                 },
-                mounted() {
-                    axios.get("{{ route('posts.showComments', ['id' => $post->id]) }}")
+                postRemove:function(post) {
+                    axios.delete("{{ route('posts.index') }}/" + post.id)
                         .then(response => {
-                            this.comments = response.data;
-                            this.tempComments = JSON.parse(JSON.stringify(this.comments))
+                            window.location.href = "{{ route('posts.index') }}";
                         })
-                        .catch(response => {console.log(response)});
+                        .catch(response => {console.log(response);})   
                 },
-                methods: {
-                    commentEdit:function(comment) {
-                        comment.isEdited = true;
-                    },
-                    commentCancel:function(comment) {
-                        comment.isEdited = false;
-                        temp = this.tempComments.find(
-                            tempComment => tempComment.id == comment.id);
-                        comment.text = temp.text;
-                    },
-                    commentUpdate:function(comment) {
-                        axios.put("{{ route('comments.store') }}/" + comment.id, 
-                            {
-                                text:comment.text,
-                            })
-                            .then(response => {
-                                comment.isEdited = false;
-                                temp = this.tempComments.find(
-                                    tempComment => tempComment.id == comment.id);
-                                temp.text = comment.text;
-                            })
-                            .catch(response => {console.log(response);})  
-                    },
-                    commentRemove:function(comment) {
-                        axios.delete("{{ route('comments.store') }}/" + comment.id)
-                            .then(response => {
-                                this.comments.splice(this.comments.indexOf(comment), 1);
-                            })
-                            .catch(response => {console.log(response);})   
-                    },
-                    commentPost:function() {
-                        axios.post("{{ route('comments.store') }}", 
-                            {
-                                text:this.commentBox,
-                                post_id:{{ $post->id }}
-                            })
-                            .then(response => {
-                                this.commentBox = "";
-                                this.comments.push(response.data);
-                            })
-                            .catch(response => {console.log(response);})  
-                    },
-                    commentLike:function(comment) {
-                        axios.patch("{{ route('comments.store') }}/" + comment.id + "/like/true")
-                            .then(response => {
-                                comment.likeCount++;
-                                comment.alreadyLiked = true;
-                            })
-                            .catch(response => {console.log(response);}) 
-                    },
-                    commentUnlike:function(comment) {
-                        axios.patch("{{ route('comments.store') }}/" + comment.id + "/like/false")
-                            .then(response => {
-                                comment.likeCount--;
-                                comment.alreadyLiked = false;
-                            })
-                            .catch(response => {console.log(response);})   
-                    }
-                }  
-            });
-        </script>  
-
-    @endfor
+                postLike:function(post) {
+                    axios.patch("{{ route('posts.index') }}/" + post.id + "/like/true")
+                        .then(response => {
+                            post.likeCount++;
+                            post.alreadyLiked = true;
+                        })
+                       .catch(response => {console.log(response);}) 
+                },
+                postUnlike:function(post) {
+                    axios.patch("{{ route('posts.index') }}/" + post.id + "/like/false")
+                        .then(response => {
+                            post.likeCount--;
+                            post.alreadyLiked = false;
+                        })
+                        .catch(response => {console.log(response);})   
+                },
+                commentEdit:function(post, comment) {
+                    comment.isEdited = true;
+                },
+                commentCancel:function(post, comment) {
+                    comment.isEdited = false;
+                    tempP = this.tempPosts.find(
+                        tempPost => tempPost.id == post.id);
+                    tempC = tempP.comments.find(
+                        tempComment => tempComment.id == comment.id);
+                    comment.text = tempC.text;
+                },
+                commentUpdate:function(post, comment) {
+                    axios.put("{{ route('comments.store') }}/" + comment.id, 
+                        {
+                            text:comment.text,
+                        })
+                        .then(response => {
+                            comment.isEdited = false;
+                            tempP = this.tempPosts.find(
+                                tempPost => tempPost.id == post.id);
+                            tempC = tempP.comments.find(
+                                tempComment => tempComment.id == comment.id);
+                            tempC.text = comment.text;
+                        })
+                        .catch(response => {console.log(response);})  
+                },
+                commentRemove:function(post, comment) {
+                    axios.delete("{{ route('comments.store') }}/" + comment.id)
+                        .then(response => {
+                            post.comments.splice(post.comments.indexOf(comment), 1);
+                        })
+                        .catch(response => {console.log(response);})   
+                },
+                commentLike:function(post, comment) {
+                    axios.patch("{{ route('comments.store') }}/" + comment.id + "/like/true")
+                        .then(response => {
+                            comment.likeCount++;
+                            comment.alreadyLiked = true;
+                        })
+                        .catch(response => {console.log(response);}) 
+                },
+                commentUnlike:function(post, comment) {
+                    axios.patch("{{ route('comments.store') }}/" + comment.id + "/like/false")
+                        .then(response => {
+                            comment.likeCount--;
+                            comment.alreadyLiked = false;
+                        })
+                        .catch(response => {console.log(response);})   
+                },
+                commentPost:function(post) {
+                    axios.post("{{ route('comments.store') }}", 
+                        {
+                            text:post.newComment,
+                            post_id:post.id
+                        })
+                        .then(response => {
+                            post.newComment = "";
+                            post.comments.push(response.data);
+                        })
+                        .catch(response => {console.log(response);})  
+                }
+            }
+        })    
+    </script>            
 
     <div>
         <br>

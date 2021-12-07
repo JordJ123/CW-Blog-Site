@@ -3,6 +3,8 @@
 
     <head>
         <title>Posts 'R' Us - @yield('title')</title>
+        <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+        <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
     </head>
     
     <body>
@@ -27,7 +29,7 @@
         <div>
             <h1>@yield('title')</h1>
         </div>
-        <div>
+        <div id="content">
             @yield('content')    
         </div>
     </body>
