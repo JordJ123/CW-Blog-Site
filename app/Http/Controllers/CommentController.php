@@ -61,7 +61,7 @@ class CommentController extends Controller
             $subject, 'emails.comment', ['comment' => $comment]);
             $email->send();
         }
-        return redirect()->route('posts.index');
+        return $comment;
 
     }
 

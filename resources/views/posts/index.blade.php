@@ -64,21 +64,26 @@
                 @{{ comment.name }}
                 (Likes @{{ comment.likeCount }}): 
                 @{{ comment.text }}
-                <button v-if="!comment.alreadyLiked" @click="like(comment)">
+                <button v-if="!comment.alreadyLiked" @click="commentLike(comment)">
                     Like</button>
-                <button v-if="comment.alreadyLiked" @click="unlike(comment)">
+                <button v-if="comment.alreadyLiked" @click="commentUnlike(comment)">
                     Unlike</button>
-                <button v-if="comment.isUser" @click="edit(comment)">
+                <button v-if="comment.isUser" @click="commentEdit(comment)">
                     Edit</button></a>
-                <button v-if="comment.isUser" @click="remove(comment)">
-                    Delete</button>
-            </p>   
+                <button v-if="comment.isUser" @click="commentRemove(comment)">
+                    Delete</button>   
+            </p>
+            <p>
+                <input v-model="commentBox" type="text"/>
+                <button @click="commentPost()">Send</button>
+            </p>    
         </div>
         <script>
             var app = new Vue ({
                 el: "#post{{ $i }}",
                 data: {
-                    comments: []
+                    comments: [],
+                    commentBox: ""
                 },
                 mounted() {
                     axios.get("{{ route('posts.showComments', ['id' => $post->id]) }}")
@@ -86,7 +91,7 @@
                         .catch(response => {console.log(response)})
                 },
                 methods: {
-                    like:function(comment) {
+                    commentLike:function(comment) {
                         axios.patch("{{ route('comments.store') }}/" + comment.id + "/like/true")
                             .then(response => {
                                 comment.likeCount++;
@@ -94,7 +99,7 @@
                             })
                             .catch(response => {console.log(response);}) 
                     },
-                    unlike:function(comment) {
+                    commentUnlike:function(comment) {
                         axios.patch("{{ route('comments.store') }}/" + comment.id + "/like/false")
                             .then(response => {
                                 comment.likeCount--;
@@ -102,16 +107,28 @@
                             })
                             .catch(response => {console.log(response);})   
                     },
-                    edit:function(comment) {
+                    commentEdit:function(comment) {
                         window.location.href = 
                             "{{ route('comments.store') }}/" + comment.id + "/edit"
                     },
-                    remove:function(comment) {
+                    commentRemove:function(comment) {
                         axios.delete("{{ route('comments.store') }}/" + comment.id)
                             .then(response => {
                                 this.comments.splice(this.comments.indexOf(comment), 1);
                             })
                             .catch(response => {console.log(response);})   
+                    },
+                    commentPost:function() {
+                        axios.post("{{ route('comments.store') }}", 
+                            {
+                                text:this.commentBox,
+                                post_id:{{ $post->id }}
+                            })
+                            .then(response => {
+                                this.commentBox = "";
+                                this.comments.push(response.data);
+                            })
+                            .catch(response => {console.log(response);})  
                     }
                 }  
             });
