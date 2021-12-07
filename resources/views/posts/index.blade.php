@@ -67,8 +67,8 @@
                 <input v-model="comment.text" v-if="comment.isEdited" type="text"/>
                 <button v-if="comment.isEdited" @click="commentUpdate(comment)">
                     Update</button>
-                <!-- <button v-if="comment.isEdited" 
-                    @click="commentCancel(comment, comment.text)">Cancel</button> -->
+                <button v-if="comment.isEdited" 
+                    @click="commentCancel(comment)">Cancel</button>
                 <button v-if="comment.isUser && !comment.isEdited" 
                     @click="commentEdit(comment)">Edit</button></a>
                 <button v-if="comment.isUser" @click="commentRemove(comment)">
@@ -89,20 +89,26 @@
                 el: "#post{{ $i }}",
                 data: {
                     comments: [],
+                    tempComments: [],
                     commentBox: ""
                 },
                 mounted() {
                     axios.get("{{ route('posts.showComments', ['id' => $post->id]) }}")
-                        .then(response => {this.comments = response.data;})
-                        .catch(response => {console.log(response)})
+                        .then(response => {
+                            this.comments = response.data;
+                            this.tempComments = JSON.parse(JSON.stringify(this.comments))
+                        })
+                        .catch(response => {console.log(response)});
                 },
                 methods: {
                     commentEdit:function(comment) {
                         comment.isEdited = true;
                     },
-                    commentCancel:function(comment, text) {
+                    commentCancel:function(comment) {
                         comment.isEdited = false;
-                        comment.text = text;
+                        temp = this.tempComments.find(
+                            tempComment => tempComment.id == comment.id);
+                        comment.text = temp.text;
                     },
                     commentUpdate:function(comment) {
                         axios.put("{{ route('comments.store') }}/" + comment.id, 
@@ -111,9 +117,11 @@
                             })
                             .then(response => {
                                 comment.isEdited = false;
+                                temp = this.tempComments.find(
+                                    tempComment => tempComment.id == comment.id);
+                                temp.text = comment.text;
                             })
                             .catch(response => {console.log(response);})  
-                        comment.isEdited = false;
                     },
                     commentRemove:function(comment) {
                         axios.delete("{{ route('comments.store') }}/" + comment.id)

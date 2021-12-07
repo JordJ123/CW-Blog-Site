@@ -124,7 +124,7 @@ class CommentController extends Controller
             }
         }
 
-        return redirect()->route('posts.index');
+        return null;
 
     }
 
