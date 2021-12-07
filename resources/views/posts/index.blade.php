@@ -63,21 +63,27 @@
             <p v-for="comment in comments">
                 @{{ comment.name }}
                 (Likes @{{ comment.likeCount }}): 
-                @{{ comment.text }}
+                <label v-if="!comment.isEdited">@{{ comment.text }}</label>
+                <input v-model="comment.text" v-if="comment.isEdited" type="text"/>
+                <button v-if="comment.isEdited" @click="commentUpdate(comment)">
+                    Update</button>
+                <!-- <button v-if="comment.isEdited" 
+                    @click="commentCancel(comment, comment.text)">Cancel</button> -->
+                <button v-if="comment.isUser && !comment.isEdited" 
+                    @click="commentEdit(comment)">Edit</button></a>
+                <button v-if="comment.isUser" @click="commentRemove(comment)">
+                    Delete</button>
                 <button v-if="!comment.alreadyLiked" @click="commentLike(comment)">
                     Like</button>
                 <button v-if="comment.alreadyLiked" @click="commentUnlike(comment)">
-                    Unlike</button>
-                <button v-if="comment.isUser" @click="commentEdit(comment)">
-                    Edit</button></a>
-                <button v-if="comment.isUser" @click="commentRemove(comment)">
-                    Delete</button>   
+                    Unlike</button>   
             </p>
             <p>
                 <input v-model="commentBox" type="text"/>
                 <button @click="commentPost()">Send</button>
             </p>    
         </div>
+
         <script>
             var app = new Vue ({
                 el: "#post{{ $i }}",
@@ -91,25 +97,23 @@
                         .catch(response => {console.log(response)})
                 },
                 methods: {
-                    commentLike:function(comment) {
-                        axios.patch("{{ route('comments.store') }}/" + comment.id + "/like/true")
-                            .then(response => {
-                                comment.likeCount++;
-                                comment.alreadyLiked = true;
-                            })
-                            .catch(response => {console.log(response);}) 
-                    },
-                    commentUnlike:function(comment) {
-                        axios.patch("{{ route('comments.store') }}/" + comment.id + "/like/false")
-                            .then(response => {
-                                comment.likeCount--;
-                                comment.alreadyLiked = false;
-                            })
-                            .catch(response => {console.log(response);})   
-                    },
                     commentEdit:function(comment) {
-                        window.location.href = 
-                            "{{ route('comments.store') }}/" + comment.id + "/edit"
+                        comment.isEdited = true;
+                    },
+                    commentCancel:function(comment, text) {
+                        comment.isEdited = false;
+                        comment.text = text;
+                    },
+                    commentUpdate:function(comment) {
+                        axios.put("{{ route('comments.store') }}/" + comment.id, 
+                            {
+                                text:comment.text,
+                            })
+                            .then(response => {
+                                comment.isEdited = false;
+                            })
+                            .catch(response => {console.log(response);})  
+                        comment.isEdited = false;
                     },
                     commentRemove:function(comment) {
                         axios.delete("{{ route('comments.store') }}/" + comment.id)
@@ -129,10 +133,27 @@
                                 this.comments.push(response.data);
                             })
                             .catch(response => {console.log(response);})  
+                    },
+                    commentLike:function(comment) {
+                        axios.patch("{{ route('comments.store') }}/" + comment.id + "/like/true")
+                            .then(response => {
+                                comment.likeCount++;
+                                comment.alreadyLiked = true;
+                            })
+                            .catch(response => {console.log(response);}) 
+                    },
+                    commentUnlike:function(comment) {
+                        axios.patch("{{ route('comments.store') }}/" + comment.id + "/like/false")
+                            .then(response => {
+                                comment.likeCount--;
+                                comment.alreadyLiked = false;
+                            })
+                            .catch(response => {console.log(response);})   
                     }
                 }  
             });
         </script>  
+
     @endfor
 
     <div>

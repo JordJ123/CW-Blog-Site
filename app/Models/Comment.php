@@ -9,7 +9,7 @@ class Comment extends Model
 {
     use HasFactory;
 
-    protected $appends = ['name', 'likeCount', 'isUser', 'alreadyLiked'];
+    protected $appends = ['name', 'likeCount', 'isUser', 'alreadyLiked', 'isEdited'];
 
     public function getNameAttribute() {
         return $this->user()->first()->name;
@@ -32,6 +32,10 @@ class Comment extends Model
             }
         }
         return $alreadyLiked;   
+    }
+
+    public function getIsEditedAttribute() {
+        return false;
     }
 
     public function user() {
