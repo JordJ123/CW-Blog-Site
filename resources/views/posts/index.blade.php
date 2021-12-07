@@ -4,13 +4,17 @@
 
 @section('content')
 
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
     <a href="{{ route('posts.create') }}">New Post</a>
+    
 
     @php
         $end = min($page * 5, $posts->count());
     @endphp
     @for ($i = (($page - 1) * 5); $i < $end; $i++)
-        <div>
+        <div id="post{{ $i }}">
             @php
                 $post = $posts->reverse()->values()[$i];
                 $alreadyLiked = false;
@@ -56,57 +60,62 @@
                     style="height:128px"/></p>
             @endif
             <p> {{ $post->text }}</p>
-            @foreach ($post->comments()->get() as $comment)
-                @php
-                    $post = $posts->reverse()->values()[$i];
-                    $commentLiked = false;
-                @endphp    
-                @foreach ($comment->likes()->get() as $user)
-                    @if ($user->id == auth()->user()->id)
-                        @php
-                            $commentLiked = true;
-                            break;                            
-                        @endphp    
-                    @endif
-                @endforeach
-                <p>
-                    {{ $comment->user()->first()->name }}
-                    (Likes {{ $comment->likes()->count() }}): 
-                    {{ $comment->text }}
-                    @if ($comment->user()->first() == auth()->user())
-                        <a href="{{ route('comments.edit', ['id' => $comment->id]) }}">Edit</a>
-                        <form method="POST" action="{{ route('comments.destroy', 
-                            ['id' => $comment->id]) }}">
-                            @csrf
-                            @method('DELETE')
-                            <input type="submit" value="Delete">
-                        </form>
-                    @endif 
-                    @if ($commentLiked)
-                        <form method="POST" action="{{ route('comments.updateLike', 
-                            ['id' => $comment->id, 'like' => 'false']) }}">
-                            @csrf
-                            @method('PATCH')
-                            <input type="submit" value="Unlike">
-                        </form>
-                    @else
-                        <form method="POST" action="{{ route('comments.updateLike', 
-                            ['id' => $comment->id, 'like' => 'true']) }}">
-                            @csrf
-                            @method('PATCH')
-                            <input type="submit" value="Like">
-                        </form>
-                    @endif
-                </p>                    
-            @endforeach
-            <form method="POST" action="{{ route('comments.store') }}">
-                @csrf
-                Comment: <input type="type" name="text"
-                    value="{{ old('name') }}">
-                <input type="hidden" name="post_id" value="{{ $post->id }}">
-                <input type="submit" value="Send">
-            </form>
+            <p v-for="comment in comments">
+                @{{ comment.name }}
+                (Likes @{{ comment.likeCount }}): 
+                @{{ comment.text }}
+                <button v-if="!comment.alreadyLiked" @click="like(comment)">
+                    Like</button>
+                <button v-if="comment.alreadyLiked" @click="unlike(comment)">
+                    Unlike</button>
+                <button v-if="comment.isUser" @click="edit(comment)">
+                    Edit</button></a>
+                <button v-if="comment.isUser" @click="remove(comment)">
+                    Delete</button>
+            </p>   
         </div>
+        <script>
+            var app = new Vue ({
+                el: "#post{{ $i }}",
+                data: {
+                    comments: []
+                },
+                mounted() {
+                    axios.get("{{ route('posts.showComments', ['id' => $post->id]) }}")
+                        .then(response => {this.comments = response.data;})
+                        .catch(response => {console.log(response)})
+                },
+                methods: {
+                    like:function(comment) {
+                        axios.patch("{{ route('comments.store') }}/" + comment.id + "/like/true")
+                            .then(response => {
+                                comment.likeCount++;
+                                comment.alreadyLiked = true;
+                            })
+                            .catch(response => {console.log(response);}) 
+                    },
+                    unlike:function(comment) {
+                        axios.patch("{{ route('comments.store') }}/" + comment.id + "/like/false")
+                            .then(response => {
+                                comment.likeCount--;
+                                comment.alreadyLiked = false;
+                            })
+                            .catch(response => {console.log(response);})   
+                    },
+                    edit:function(comment) {
+                        window.location.href = 
+                            "{{ route('comments.store') }}/" + comment.id + "/edit"
+                    },
+                    remove:function(comment) {
+                        axios.delete("{{ route('comments.store') }}/" + comment.id)
+                            .then(response => {
+                                this.comments.splice(this.comments.indexOf(comment), 1);
+                            })
+                            .catch(response => {console.log(response);})   
+                    }
+                }  
+            });
+        </script>  
     @endfor
 
     <div>
@@ -135,6 +144,6 @@
         @if ($page != ceil($posts->count() / 5) && $posts->count() != 0)
             <a href="{{ route('posts.index', ['page' => $page + 1]) }}">Next</a>
         @endif
-    </div>  
+    </div>
 
 @endsection

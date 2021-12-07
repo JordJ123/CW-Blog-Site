@@ -26,6 +26,8 @@ Route::get('/', function () {
 Route::redirect('/dashboard', '/posts');
 Route::get('/posts', [PostController::class, 'index'])
     ->middleware(['auth'])->name('posts.index');
+Route::get('/posts/{id}/comments', [PostController::class, 'showComments'])
+    ->middleware(['auth'])->name('posts.showComments');
 Route::get('/posts/create', [PostController::class, 'create'])
     ->middleware(['auth'])->name('posts.create');
 Route::get('/posts/{id}/edit', [PostController::class, 'edit'])

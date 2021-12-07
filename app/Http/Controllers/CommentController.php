@@ -117,7 +117,7 @@ class CommentController extends Controller
             $email->send();
         }
         foreach ($comment->likes()->get() as $recipent) {
-            if ($recipent->id != $post->user()->first()->id) {
+            if ($recipent->id != $comment->user()->first()->id) {
                 $email = new Email($sender, $recipent, $subject, 'emails.edited', 
                 ['resource' => $comment, 'type' => "comment", 'status' => "liked"]);
                 $email->send();
@@ -158,7 +158,7 @@ class CommentController extends Controller
             $email->send();
         }
 
-        return redirect()->route('posts.index');
+        return null;
 
     }
 
@@ -192,7 +192,7 @@ class CommentController extends Controller
             }
         }
 
-        return redirect()->route('posts.index');
+        return null;
 
     }
 }
