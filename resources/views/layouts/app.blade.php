@@ -11,10 +11,8 @@
         <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
         <link href="{{ asset('css/app.css') }}" rel="stylesheet">
-        @livewireStyles
 
         <script src="{{ asset('js/app.js') }}"></script>
-        @livewireScripts
 
     </head>
     
