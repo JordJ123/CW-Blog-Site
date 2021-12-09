@@ -1,3 +1,13 @@
-@import 'tailwindcss/base';
-@import 'tailwindcss/components';
-@import 'tailwindcss/utilities';
+// Fonts
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;700&display=swap');
+
+// Variables
+@import 'variables';
+
+// Bootstrap
+@import '~bootstrap/scss/bootstrap';
+
+// Fontawesome
+//$fa-font-path:        "../webfonts";
+//@import "~@fortawesome/fontawesome-free/scss/fontawesome";
+//@import "~@fortawesome/fontawesome-free/scss/solid";

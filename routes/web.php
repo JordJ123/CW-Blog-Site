@@ -18,12 +18,11 @@ use App\Http\Controllers\CommentController;
 
 //Home
 Route::get('/', function () {
-    return view('welcome');
+    return view('home');
 })->middleware(['guest'])->name('home');
 
 
 //Posts
-Route::redirect('/dashboard', '/posts');
 Route::get('/posts', [PostController::class, 'index'])
     ->middleware(['auth'])->name('posts.index');
 Route::get('/posts/indexJSON', [PostController::class, 'indexJSON'])

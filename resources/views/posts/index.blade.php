@@ -29,7 +29,7 @@
                 <input v-model="comment.text" v-if="comment.isEdited" type="text"/>
                 <button v-if="comment.isEdited" @click="commentUpdate(post, comment)">
                     Update</button>
-                <button v-if="comment.isEdited" 
+                <button class="btn-primary" v-if="comment.isEdited" 
                     @click="commentCancel(post, comment)">Cancel</button>
                 <button v-if="comment.isUser && !comment.isEdited" 
                     @click="commentEdit(post, comment)">Edit</button>
