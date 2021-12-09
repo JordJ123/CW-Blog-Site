@@ -26,6 +26,6 @@
         <div class="text-center">
             <a class="btn link-dark " href="{{ route('register') }}">
                 Don't Already Have an Account?</a>
-        </div>   
+        </div> 
     </form>
 @endsection

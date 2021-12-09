@@ -23,6 +23,7 @@ Route::get('/', function () {
 
 
 //Posts
+Route::redirect('/dashboard', '/posts');
 Route::get('/posts', [PostController::class, 'index'])
     ->middleware(['auth'])->name('posts.index');
 Route::get('/posts/indexJSON', [PostController::class, 'indexJSON'])
