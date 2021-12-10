@@ -1,11 +1,9 @@
 @extends('layouts.app')
 
-@section('title', 'Feed')
-
 @section('content')
 
     <div>
-        <h1 class="text-primary">@yield('title')</h1>
+        <h1 class="text-primary">Feed</h1>
         <a class="btn btn-primary text-secondary mb-3" href="{{ route('posts.create') }}">New Post</a>
     </div>   
     
@@ -47,6 +45,33 @@
             <input v-model="post.newComment" type="text"/>
             <button class="text-secondary btn-primary" @click="commentPost(post)">Send</button>
         </p>
+    </div>
+
+    <div>
+        <form method="POST" action="{{ route('logout') }}">
+            @csrf
+            <button type="submit" class="text-secondary btn btn-danger">Logout</button>
+        </form>
+    </div>
+
+    <div class="text-center">
+        @php
+            $start = max (1, $page - 4);
+            $end = min (ceil($posts->count() / 5), $page + 4)
+        @endphp
+        @if ($page != 1)
+            <a href="{{ route('posts.index', ['page' => $page - 1]) }}">Previous</a>
+        @endif
+        @for ($i = $start; $i <= $end; $i++)
+            @if ($page != $i)
+                <a href="{{ route('posts.index', ['page' => $i]) }}">{{ $i }}</a>
+            @else
+                <b> {{ $i }} </b>
+            @endif    
+        @endfor
+        @if ($page != ceil($posts->count() / 5) && $posts->count() != 0)
+            <a href="{{ route('posts.index', ['page' => $page + 1]) }}">Next</a>
+        @endif
     </div>
 
     <script>
@@ -155,33 +180,5 @@
             }
         })    
     </script>            
-
-    <div>
-        <br>
-        <form method="POST" action="{{ route('logout') }}">
-            @csrf
-            <input type="submit" value="Logout">
-        </form>
-    </div>
-
-    <div style="text-align:center">
-        @php
-            $start = max (1, $page - 4);
-            $end = min (ceil($posts->count() / 5), $page + 4)
-        @endphp
-        @if ($page != 1)
-            <a href="{{ route('posts.index', ['page' => $page - 1]) }}">Previous</a>
-        @endif
-        @for ($i = $start; $i <= $end; $i++)
-            @if ($page != $i)
-                <a href="{{ route('posts.index', ['page' => $i]) }}">{{ $i }}</a>
-            @else
-                <b> {{ $i }} </b>
-            @endif    
-        @endfor
-        @if ($page != ceil($posts->count() / 5) && $posts->count() != 0)
-            <a href="{{ route('posts.index', ['page' => $page + 1]) }}">Next</a>
-        @endif
-    </div>
 
 @endsection

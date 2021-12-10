@@ -277,7 +277,7 @@ class PostController extends Controller
         File::delete(public_path("images/" . $image->path));
         $image->delete();
 
-        return redirect()->route('posts.index');
+        return null;
 
     }
 
