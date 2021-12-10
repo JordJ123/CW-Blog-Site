@@ -11,6 +11,7 @@
         <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 
         <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+        @yield('style')
 
         <script src="{{ asset('js/app.js') }}"></script>
 

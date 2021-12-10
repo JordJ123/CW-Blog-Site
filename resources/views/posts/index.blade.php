@@ -4,47 +4,49 @@
 
 @section('content')
 
-    <a href="{{ route('posts.create') }}">New Post</a>
+    <div>
+        <h1 class="text-primary">@yield('title')</h1>
+        <a class="btn btn-primary text-secondary mb-3" href="{{ route('posts.create') }}">New Post</a>
+    </div>   
     
-
     @php
         $end = min($page * 5, $posts->count());
     @endphp
-    <div v-for="post in posts">
-            <p><b>
-                @{{ post.name }}
-                (Likes @{{ post.likeCount }})
-                <button v-if="post.isUser" @click="postEdit(post)">Edit</button> 
-                <button v-if="post.isUser" @click="postRemove(post)">Delete</button>
-                <button v-if="!post.alreadyLiked" @click="postLike(post)">Like</button>
-                <button v-if="post.alreadyLiked" @click="postUnlike(post)">Unlike</button>   
-            </b><p>
-            <p v-if="post.image != null"><img :src="'images/' + post.image.path" 
-                :alt="post.image.text" style="height:128px"/></p>
-            <p>@{{ post.text }}</p>
-            <p v-for="comment in post.comments">
-                @{{ comment.name }}
-                (Likes @{{ comment.likeCount }}): 
-                <label v-if="!comment.isEdited">@{{ comment.text }}</label>
-                <input v-model="comment.text" v-if="comment.isEdited" type="text"/>
-                <button v-if="comment.isEdited" @click="commentUpdate(post, comment)">
-                    Update</button>
-                <button class="btn-primary" v-if="comment.isEdited" 
-                    @click="commentCancel(post, comment)">Cancel</button>
-                <button v-if="comment.isUser && !comment.isEdited" 
-                    @click="commentEdit(post, comment)">Edit</button>
-                <button v-if="comment.isUser" @click="commentRemove(post, comment)">
-                    Delete</button>
-                <button v-if="!comment.alreadyLiked" @click="commentLike(post, comment)">
-                    Like</button>
-                <button v-if="comment.alreadyLiked" @click="commentUnlike(post, comment)">
-                    Unlike</button>   
-            </p>
-            <p>
-                <input v-model="post.newComment" type="text"/>
-                <button @click="commentPost(post)">Send</button>
-            </p>    
-        </div>
+
+    <div class="border border-dark p-3 mb-3" v-for="post in posts">
+        <p><b>
+            @{{ post.name }}
+            (Likes @{{ post.likeCount }})
+            <button class="text-secondary btn-primary" v-if="post.isUser" @click="postEdit(post)">Edit</button> 
+            <button class="text-secondary btn-danger" v-if="post.isUser" @click="postRemove(post)">Delete</button>
+            <button class="text-secondary btn-primary" v-if="!post.alreadyLiked" @click="postLike(post)">Like</button>
+            <button class="text-secondary btn-primary" v-if="post.alreadyLiked" @click="postUnlike(post)">Unlike</button>   
+        </b><p>
+        <p v-if="post.image != null"><img :src="'images/' + post.image.path" 
+            :alt="post.image.text" style="height:128px"/></p>
+        <p>@{{ post.text }}</p>
+        <p v-for="comment in post.comments">
+            @{{ comment.name }}
+            (Likes @{{ comment.likeCount }}): 
+            <label v-if="!comment.isEdited">@{{ comment.text }}</label>
+            <input v-model="comment.text" v-if="comment.isEdited" type="text"/>
+            <button class="text-secondary btn-primary" v-if="comment.isEdited" @click="commentUpdate(post, comment)">
+                Update</button>
+            <button class="text-secondary btn-primary" v-if="comment.isEdited" 
+                @click="commentCancel(post, comment)">Cancel</button>
+            <button class="text-secondary btn-primary" v-if="comment.isUser && !comment.isEdited" 
+                @click="commentEdit(post, comment)">Edit</button>
+            <button class="text-secondary btn-danger" v-if="comment.isUser" @click="commentRemove(post, comment)">
+                Delete</button>
+            <button class="text-secondary btn-primary" v-if="!comment.alreadyLiked" @click="commentLike(post, comment)">
+                Like</button>
+            <button class="text-secondary btn-primary" v-if="comment.alreadyLiked" @click="commentUnlike(post, comment)">
+                Unlike</button>   
+        </p>
+        <p>
+            <input v-model="post.newComment" type="text"/>
+            <button class="text-secondary btn-primary" @click="commentPost(post)">Send</button>
+        </p>
     </div>
 
     <script>
