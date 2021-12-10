@@ -1,10 +1,12 @@
 <!doctype html>
 <html lang="en">
 
-    <body>
-        
+    <head>
+        <link href="{{ asset('css/app.css') }}" rel="stylesheet">
+    </head>
+
+    <body class="containter m-3">
         @yield('content')    
-        
     </body>
 
 </html>
