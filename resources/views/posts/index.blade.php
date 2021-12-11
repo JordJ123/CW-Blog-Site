@@ -15,10 +15,14 @@
         <p><b>
             @{{ post.name }}
             (Likes @{{ post.likeCount }})
-            <button class="text-secondary btn-primary" v-if="post.isUser" @click="postEdit(post)">Edit</button> 
-            <button class="text-secondary btn-danger" v-if="post.isUser" @click="postRemove(post)">Delete</button>
-            <button class="text-secondary btn-primary" v-if="!post.alreadyLiked" @click="postLike(post)">Like</button>
-            <button class="text-secondary btn-primary" v-if="post.alreadyLiked" @click="postUnlike(post)">Unlike</button>   
+            <button class="text-secondary btn-primary" v-if="isAdmin || post.isUser" 
+                @click="postEdit(post)">Edit</button> 
+            <button class="text-secondary btn-danger" v-if="isAdmin || post.isUser" 
+                @click="postRemove(post)">Delete</button>
+            <button class="text-secondary btn-primary" v-if="!post.alreadyLiked" 
+                @click="postLike(post)">Like</button>
+            <button class="text-secondary btn-primary" v-if="post.alreadyLiked" 
+                @click="postUnlike(post)">Unlike</button>   
         </b><p>
         <p v-if="post.image != null"><img :src="'images/' + post.image.path" 
             :alt="post.image.text" style="height:128px"/></p>
@@ -28,18 +32,18 @@
             (Likes @{{ comment.likeCount }}): 
             <label v-if="!comment.isEdited">@{{ comment.text }}</label>
             <input v-model="comment.text" v-if="comment.isEdited" type="text"/>
-            <button class="text-secondary btn-primary" v-if="comment.isEdited" @click="commentUpdate(post, comment)">
-                Update</button>
+            <button class="text-secondary btn-primary" v-if="comment.isEdited" 
+                @click="commentUpdate(post, comment)">Update</button>
             <button class="text-secondary btn-primary" v-if="comment.isEdited" 
                 @click="commentCancel(post, comment)">Cancel</button>
-            <button class="text-secondary btn-primary" v-if="comment.isUser && !comment.isEdited" 
-                @click="commentEdit(post, comment)">Edit</button>
-            <button class="text-secondary btn-danger" v-if="comment.isUser" @click="commentRemove(post, comment)">
-                Delete</button>
-            <button class="text-secondary btn-primary" v-if="!comment.alreadyLiked" @click="commentLike(post, comment)">
-                Like</button>
-            <button class="text-secondary btn-primary" v-if="comment.alreadyLiked" @click="commentUnlike(post, comment)">
-                Unlike</button>   
+            <button class="text-secondary btn-primary" v-if="(isAdmin || comment.isUser) 
+                && !comment.isEdited" @click="commentEdit(post, comment)">Edit</button>
+            <button class="text-secondary btn-danger" v-if="isAdmin || comment.isUser" 
+                @click="commentRemove(post, comment)">Delete</button>
+            <button class="text-secondary btn-primary" v-if="!comment.alreadyLiked" 
+                @click="commentLike(post, comment)">Like</button>
+            <button class="text-secondary btn-primary" v-if="comment.alreadyLiked" 
+                @click="commentUnlike(post, comment)">Unlike</button>   
         </p>
         <p>
             <input v-model="post.newComment" type="text"/>
@@ -78,6 +82,7 @@
         var app = new Vue ({
             el: "#content",
             data: {
+                isAdmin: {{ auth()->user()->first()->isAdmin }},
                 posts: [],
             },
             mounted() {
