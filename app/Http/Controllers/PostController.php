@@ -7,7 +7,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Post;
 use App\Models\Image;
-use App\Classes\Email;
+use App\EmailService;
 
 class PostController extends Controller
 {
@@ -120,7 +120,7 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id, EmailService $emailService)
     {
 
         $validatedData = $request->validate([
@@ -169,23 +169,18 @@ class PostController extends Controller
         }        
 
         //Email
-        $sender = new User;
-        $sender->name = "Posts R Us";
-        $sender->email = "postsrus@email.com";
         $subject = "Edited Post";
         foreach ($post->likes()->get() as $recipent) {
             if ($recipent->id != $post->user()->first()->id) {
-                $email = new Email($sender, $recipent, $subject, 'emails.edited', 
+                $emailService->email($recipent, $subject, 'emails.edited', 
                 ['resource' => $post, 'type' => "post", 'status' => "liked"]);
-                $email->send();
             }
         }
         foreach ($post->comments()->get() as $comment) {
             if ($comment->user()->first()->id != $post->user()->first()->id) {
-                $email = new Email($sender, $comment->user()->first(), $subject, 
+                $emailService->email($comment->user()->first(), $subject, 
                 'emails.edited', 
                 ['resource' => $post, 'type' => "post", 'status' => "commented on"]);
-                $email->send();
             }    
         }
 
@@ -200,26 +195,24 @@ class PostController extends Controller
      * @param  int  $like
      * @return \Illuminate\Http\Response
      */
-    public function updateLike(Request $request, $id, $like)
+    public function updateLike(Request $request, $id, $like, EmailService $emailService)
     {
 
         $post = Post::findOrFail($id);
         if ($like == "true") {
             $post->likes()->attach(auth()->user()->id);
+            $status = "liked";
         } else {
             $post->likes()->detach(auth()->user()->id);
+            $status = "unliked";
         }
 
-        $sender = new User;
-        $sender->name = "Posts R Us";
-        $sender->email = "postsrus@email.com";
         $recipent = $post->user()->first();
         $subject = "Post Interaction";
         if ($recipent->id != auth()->user()->first()->id) {
-            $email = new Email($sender, $recipent, $subject, 'emails.liked', 
-            ['resource' => $post, 'type' => "post", 
-                'user' => auth()->user()->first()->name]);
-            $email->send();
+            $emailService->email($recipent, $subject, 'emails.liked', 
+            ['resource' => $post, 'type' => "post", 'status' => $status,
+            'user' => auth()->user()->first()->name]);
         }
 
         return null;
@@ -232,29 +225,24 @@ class PostController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id, EmailService $emailService)
     {
         
         $post = Post::findOrFail($id);
         $post->delete();
 
-        $sender = new User;
-        $sender->name = "Posts R Us";
-        $sender->email = "postsrus@email.com";
         $subject = "Deleted Post";
         foreach ($post->likes()->get() as $recipent) {
-            if ($recipent->id != $post->user()) {
-                $email = new Email($sender, $recipent, $subject, 'emails.deleted', 
+            if ($recipent->id != $post->user()->first()->id) {
+                $emailService->email($recipent, $subject, 'emails.deleted', 
                 ['resource' => $post, 'type' => "post", 'status' => "liked"]);
-                $email->send();
             }
         }
         foreach ($post->comments()->get() as $comment) {
             if ($comment->user()->first()->id != $post->user()->first()->id) {
-                $email = new Email($sender, $comment->user()->first(), $subject, 
+                $emailService->email($comment->user()->first(), $subject, 
                 'emails.deleted', 
                 ['resource' => $post, 'type' => "post", 'status' => "commented on"]);
-                $email->send();
             }    
         }
 

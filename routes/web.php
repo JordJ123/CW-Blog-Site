@@ -1,7 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\MailHandler;
+use App\EmailService;
+use App\Models\User;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
 
@@ -16,11 +17,18 @@ use App\Http\Controllers\CommentController;
 |
 */
 
+//Binding
+app()->singleton('App\EmailService', function($app) {
+    $sender = new User;
+    $sender->name = "Posts R Us";
+    $sender->email = "postsrus@email.com";
+    return new EmailService($sender);
+});
+
 //Home
 Route::get('/', function () {
     return view('home');
 })->middleware(['guest'])->name('home');
-
 
 //Posts
 Route::redirect('/dashboard', '/posts');

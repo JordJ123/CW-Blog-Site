@@ -7,7 +7,7 @@ use Mail;
 use App\Models\User;
 use App\Models\Post;
 use App\Models\Comment;
-use App\Classes\Email;
+use App\EmailService;
 
 class CommentController extends Controller
 {
@@ -37,9 +37,9 @@ class CommentController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, EmailService $emailService)
     {
-
+        
         $validatedData = $request->validate([
             'text' => 'required|max:255',
             'post_id' => 'required|integer',
@@ -51,15 +51,10 @@ class CommentController extends Controller
         $comment->post_id = $validatedData['post_id'];
         $comment->save();
 
-        $sender = new User;
-        $sender->name = "Posts R Us";
-        $sender->email = "postsrus@email.com";
         $recipent = Post::findOrFail($comment->post_id)->user()->first();
         $subject = "Posted Comment";
         if ($recipent->id != auth()->user()->id) {
-            $email = new Email($sender, $recipent, 
-            $subject, 'emails.comment', ['comment' => $comment]);
-            $email->send();
+            $emailService->email($recipent, $subject, 'emails.comment', ['comment' => $comment]);
         }
         return $comment;
 
@@ -95,7 +90,7 @@ class CommentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id, EmailService $emailService)
     {
 
         $validatedData = $request->validate([
@@ -106,21 +101,16 @@ class CommentController extends Controller
         $comment->text = $validatedData['text'];
         $comment->save();
 
-        $sender = new User;
-        $sender->name = "Posts R Us";
-        $sender->email = "postsrus@email.com";
         $recipent = Post::findOrFail($comment->post_id)->user()->first();
         $subject = "Editted Comment";
         if ($recipent->id != $comment->user()->first()->id) {
-            $email = new Email($sender, $recipent, $subject, 'emails.edited', 
+            $emailService->email($recipent, $subject, 'emails.edited', 
             ['resource' => $comment, 'type' => "comment", 'status' => "on your post"]);
-            $email->send();
         }
         foreach ($comment->likes()->get() as $recipent) {
             if ($recipent->id != $comment->user()->first()->id) {
-                $email = new Email($sender, $recipent, $subject, 'emails.edited', 
+                $emailService->email($recipent, $subject, 'emails.edited', 
                 ['resource' => $comment, 'type' => "comment", 'status' => "liked"]);
-                $email->send();
             }
         }
 
@@ -136,26 +126,24 @@ class CommentController extends Controller
      * @param  int  $like
      * @return \Illuminate\Http\Response
      */
-    public function updateLike(Request $request, $id, $like)
+    public function updateLike(Request $request, $id, $like, EmailService $emailService)
     {
 
         $comment = Comment::findOrFail($id);
         if ($like == "true") {
             $comment->likes()->attach(auth()->user()->id);
+            $status = "liked";
         } else {
             $comment->likes()->detach(auth()->user()->id);
+            $status = "unliked";
         }
 
-        $sender = new User;
-        $sender->name = "Posts R Us";
-        $sender->email = "postsrus@email.com";
         $recipent = $comment->user()->first();
         $subject = "Comment Interaction";
         if ($recipent->id != auth()->user()->first()->id) {
-            $email = new Email($sender, $recipent, $subject, 'emails.liked', 
-            ['resource' => $comment, 'type' => "comment", 
+            $emailService->email($recipent, $subject, 'emails.liked', 
+                ['resource' => $comment, 'type' => "comment", 'status' => $status,
                 'user' => auth()->user()->first()->name]);
-            $email->send();
         }
 
         return null;
@@ -168,27 +156,22 @@ class CommentController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy($id, EmailService $emailService)
     {
 
         $comment = Comment::findOrFail($id);
         $comment->delete();
 
-        $sender = new User;
-        $sender->name = "Posts R Us";
-        $sender->email = "postsrus@email.com";
         $recipent = Post::findOrFail($comment->post_id)->user()->first();
         $subject = "Deleted Comment";
         if ($recipent->id != $comment->user()->first()->id) {
-            $email = new Email($sender, $recipent, $subject, 'emails.deleted', 
+            $emailService->email($recipent, $subject, 'emails.deleted', 
             ['resource' => $comment, 'type' => "comment", 'status' => "on your post"]);
-            $email->send();
         }
         foreach ($comment->likes()->get() as $recipent) {
             if ($recipent->id != $comment->user()->first()->id) {
-                $email = new Email($sender, $recipent, $subject, 'emails.deleted', 
+                $emailService->email($recipent, $subject, 'emails.deleted', 
                 ['resource' => $comment, 'type' => "comment", 'status' => "liked"]);
-                $email->send();
             }
         }
 
