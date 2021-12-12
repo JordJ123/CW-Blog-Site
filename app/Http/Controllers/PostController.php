@@ -133,9 +133,12 @@ class PostController extends Controller
         $post->text = $validatedData['text'];
         $post->save();
 
-        //Image Text
-        if ($post->image()->first() != null) {
-            $image = $post->image()->first();
+        //Image File (Old)
+        $image = $post->image()->first();
+        if ($request['deleteImage'] == "true") {
+            File::delete(public_path("images/" . $image->path));
+            $image->delete();
+        } else if ($image != null) {
             $validatedData = $request->validate([
                 'imageText' => 'required|max:255',
             ]);
@@ -143,31 +146,19 @@ class PostController extends Controller
             $image->save();
         }
 
-        //Image File
+        //Image File (New)
         if ($request->hasFile('file')) {
-            $imageData = $request->validate([
+            $validatedData = $request->validate([
                 'file' => 'required|mimes:jpeg,bmp,png',
                 'imageText' => 'required|max:255',
             ]);
-
             $image = new Image;
             $image->path = $request->file->hashName();
-            if ($post->image()->first() != null) {
-                $oldImage = $post->image()->first();
-                $text = $oldImage->text;
-                File::delete(public_path("images/" . $oldImage->path));
-                $oldImage->delete();
-            } else {
-                $validatedData = $request->validate([
-                    'imageText' => 'required|max:255',
-                ]);
-                $text = $validatedData['imageText'];
-            }
-            $image->text = $text;
+            $image->text = $validatedData['imageText'];
             $image->post_id = $post->id;  
             $image->save();
             $request->file->move(public_path('images'), $request->file->hashName());
-        }        
+        }   
 
         //Email
         $subject = "Edited Post";
@@ -259,25 +250,6 @@ class PostController extends Controller
 
         
         $post->delete();
-
-        return null;
-
-    }
-
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroyImageFile($id)
-    {
-        
-        $post = Post::findOrFail($id);
-        $image = $post->image()->first();
-        File::delete(public_path("images/" . $image->path));
-        $image->delete();
 
         return null;
 

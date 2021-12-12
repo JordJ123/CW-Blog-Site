@@ -48,9 +48,6 @@ Route::patch('/posts/{id}/like/{like}', [PostController::class, 'updateLike'])
     ->middleware(['auth'])->name('posts.updateLike');
 Route::delete('/posts/{id}', [PostController::class, 'destroy'])
     ->middleware(['auth'])->name('posts.destroy');
-Route::delete('/posts/{id}/imageFile', [PostController::class, 'destroyImageFile'])
-    ->middleware(['auth'])->name('posts.destroyImageFile');
-
 
 //Comments
 Route::get('/comments/{id}/edit', [CommentController::class, 'edit'])
