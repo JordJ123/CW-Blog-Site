@@ -173,19 +173,19 @@ class PostController extends Controller
         $subject = "Edited Post";
         foreach ($post->likes()->get() as $recipent) {
             if (($recipent->id != $post->user()->first()->id) 
-                && ($recipent->id != auth()->user()->first()->id)) {
+                && ($recipent->id != auth()->user()->id)) {
                 $emailService->email($recipent, $subject, 'emails.edited', 
                 ['resource' => $post, 'type' => "post", 'status' => "liked"]);
             }
         }
         foreach ($post->comments()->get() as $comment) {
             if (($comment->user()->first()->id != $post->user()->first()->id)
-                && ($comment->user()->first()->id != auth()->user()->first()->id)) {
+                && ($comment->user()->first()->id != auth()->user()->id)) {
                 $emailService->email($comment->user()->first(), $subject, 'emails.edited', 
                 ['resource' => $post, 'type' => "post", 'status' => "commented on"]);
             }    
         }
-        if ($post->user()->first()->id != auth()->user()->first()->id) {
+        if ($post->user()->first()->id != auth()->user()->id) {
             $emailService->email($post->user()->first(), "Administrator Edit", 'emails.adminEdit', 
                 ['resource' => $post, 'type' => "posts", 'oldText' => $oldText]);
         }
@@ -215,10 +215,10 @@ class PostController extends Controller
 
         $recipent = $post->user()->first();
         $subject = "Post Interaction";
-        if ($recipent->id != auth()->user()->first()->id) {
+        if ($recipent->id != auth()->user()->id) {
             $emailService->email($recipent, $subject, 'emails.liked', 
             ['resource' => $post, 'type' => "post", 'status' => $status,
-            'user' => auth()->user()->first()->name]);
+            'user' => auth()->user()->name]);
         }
 
         return null;
@@ -239,20 +239,20 @@ class PostController extends Controller
         $subject = "Deleted Post";
         foreach ($post->likes()->get() as $recipent) {
             if (($recipent->id != $post->user()->first()->id)
-                && ($recipent->id != auth()->user()->first()->id)) {
+                && ($recipent->id != auth()->user()->id)) {
                 $emailService->email($recipent, $subject, 'emails.deleted', 
                 ['resource' => $post, 'type' => "post", 'status' => "liked"]);
             }
         }
         foreach ($post->comments()->get() as $comment) {
             if (($comment->user()->first()->id != $post->user()->first()->id)
-                && ($comment->user()->first()->id != auth()->user()->first()->id)) {
+                && ($comment->user()->first()->id != auth()->user()->id)) {
                 $emailService->email($comment->user()->first(), $subject, 
                 'emails.deleted', 
                 ['resource' => $post, 'type' => "post", 'status' => "commented on"]);
             }    
         }
-        if ($post->user()->first()->id != auth()->user()->first()->id) {
+        if ($post->user()->first()->id != auth()->user()->id) {
             $emailService->email($post->user()->first(), "Administrator Delete", 
                 'emails.adminDelete', ['resource' => $post, 'type' => "posts"]);
         }

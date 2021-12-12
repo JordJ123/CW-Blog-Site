@@ -21,12 +21,12 @@
             <div class="mb-3">
                 <label for="text" class="form-label text-primary">Post Text</label>
                 <input type="text" class="form-control" id="text" name="text" 
-                    value="{{ $post->text }}">
+                    value="{{ $post->text }}" maxlength="255" required>
             </div>
             <div class="mb-3">
                 <label for="imageText" class="form-label text-primary">Image Alt Text</label>
                 <input type="text" class="form-control" id="imageText" name="imageText" 
-                    value="{{ $value }}">
+                    value="{{ $value }}" maxlength="255">
             </div>
             <div class="mb-3">
                 <label for="file" class="form-label text-primary">Image File</label>

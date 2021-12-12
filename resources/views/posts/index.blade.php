@@ -3,7 +3,7 @@
 @section('content')
 
     <div>
-        <h1 class="text-primary">Feed</h1>
+        <h1 class="text-primary">Post Feed</h1>
         <a class="btn btn-primary text-secondary mb-3" href="{{ route('posts.create') }}">New Post</a>
     </div>   
     
@@ -11,7 +11,7 @@
         $end = min($page * 5, $posts->count());
     @endphp
 
-    <div class="border border-dark p-3 mb-3" v-for="post in posts">
+    <div style="background-color: #f2f2f2" class="border border-dark p-3 mb-3" v-for="post in posts">
         <p><b>
             @{{ post.name }}
             (Likes @{{ post.likeCount }})
@@ -82,7 +82,7 @@
         var app = new Vue ({
             el: "#content",
             data: {
-                isAdmin: {{ auth()->user()->first()->isAdmin }},
+                isAdmin: {{ auth()->user()->isAdmin }},
                 posts: [],
             },
             mounted() {
