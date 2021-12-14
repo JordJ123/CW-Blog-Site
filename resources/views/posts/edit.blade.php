@@ -30,9 +30,10 @@
                 <label for="file" class="form-label text-primary">Image File</label>
                 <button type="button" v-if="hasImage" class="text-secondary btn btn-danger" 
                     @click="destroyImageFile()">Remove Image</button>
-                <input v-if="!hasImage" type="file" class="form-control" id="file" name="file">
+                <input v-if="!hasImage" type="file" class="form-control" id="file" name="file"
+                    @change="setHasImage">
             </div>
-            <div class="mb-3">
+            <div v-if="imageTextBox" class="mb-3">
                 <label for="imageText" class="form-label text-primary">
                     Image Alternate Text (displays if the image can not load)</label>
                 <input type="text" class="form-control" id="imageText" name="imageText" 
@@ -51,14 +52,26 @@
             data: {
                 hasImage: "{{ ($post->image()->first() != null) }}",
                 deleteImage: false,
+                imageTextBox: true,
+            },
+            mounted() {
+                this.imageTextBox = this.hasImage;
             },
             methods: {
+                setHasImage:function() {
+                    if ($('#file').val()) {
+                        this.imageTextBox = true;
+                    } else {
+                        this.imageTextBox = false;
+                    }
+                },
                 destroyImageFile:function() {
                     this.hasImage = false;
                     this.deleteImage = true;
+                    this.imageTextBox = false;
                 }
             }
-        });      
+        });
     </script>
 
 @endsection

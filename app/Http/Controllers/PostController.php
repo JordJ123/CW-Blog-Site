@@ -71,7 +71,6 @@ class PostController extends Controller
         $post = new Post;
         $post->text = $validatedData['text'];
         $post->user_id = auth()->user()->id;
-        $post->save();
 
         if ($request->hasFile('file')) {
             $imageData = $request->validate([
@@ -85,6 +84,8 @@ class PostController extends Controller
             $image->save();
             $request->file->move(public_path('images'), $request->file->hashName());
         }
+
+        $post->save();
 
         return redirect()->route('posts.index');
 
@@ -123,15 +124,13 @@ class PostController extends Controller
     public function update(Request $request, $id, EmailService $emailService)
     {
 
+        //Post
         $validatedData = $request->validate([
             'text' => 'required|max:255',
         ]);
-        
-        //Post
         $post = Post::findOrFail($id);
         $oldText = $post->text;
         $post->text = $validatedData['text'];
-        $post->save();
 
         //Image File (Old)
         $image = $post->image()->first();
@@ -159,6 +158,8 @@ class PostController extends Controller
             $image->save();
             $request->file->move(public_path('images'), $request->file->hashName());
         }   
+
+        $post->save();
 
         //Email
         $subject = "Edited Post";

@@ -28,10 +28,10 @@
                 name="password_confirmation" maxlength="15" required>
         </div>
         <div class="text-center">
-            <button type="submit" class="text-primary btn btn-secondary">Register</button>
+            <button type="submit" class="mb-2 text-primary btn btn-secondary">Register</button>
         </div>    
         <div class="text-center">
-            <a class="btn link-secondary" href="{{ route('login') }}">
+            <a class="link-secondary" href="{{ route('login') }}">
                 Already have an account?</a>
         </div>     
     </form>

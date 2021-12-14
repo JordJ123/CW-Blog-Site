@@ -21,12 +21,12 @@
                 name="remember">
         </div>
         <div class="text-center">
-            <button type="submit" class="text-primary btn btn-secondary m-1">Login</button>
-            <a class="text-primary btn btn-secondary m-1" href="{{ route('password.request') }}">
+            <button type="submit" class="text-primary btn btn-secondary me-2 mb-2">Login</button>
+            <a class="text-primary btn btn-secondary mb-2" href="{{ route('password.request') }}">
                 Forgot Password?</a>
         </div>
         <div class="text-center">
-            <a class="btn link-secondary" href="{{ route('register') }}">
+            <a class="link-secondary" href="{{ route('register') }}">
                 Don't already have an account?</a>
         </div> 
     </form>
