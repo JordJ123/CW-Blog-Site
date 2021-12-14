@@ -128,12 +128,20 @@ class PostController extends Controller
         $validatedData = $request->validate([
             'text' => 'required|max:255',
         ]);
+        $oldPost = new Post;
         $post = Post::findOrFail($id);
-        $oldText = $post->text;
+        $oldPost->text = $post->text;
+        $oldPost->user_id = $post->user_id;
         $post->text = $validatedData['text'];
 
         //Image File (Old)
         $image = $post->image()->first();
+        $oldImage = null;
+        if ($image != null) {
+            $oldImage = new Image;
+            $oldImage->path = $image->path;
+            $oldImage->text = $image->text;
+        }
         if ($request['deleteImage'] == "true") {
             File::delete(public_path("images/" . $image->path));
             $image->delete();
@@ -141,6 +149,7 @@ class PostController extends Controller
             $validatedData = $request->validate([
                 'imageText' => 'required|max:255',
             ]);
+            $oldImage->text = $image->text;
             $image->text = $validatedData['imageText'];
             $image->save();
         }
@@ -166,20 +175,23 @@ class PostController extends Controller
         foreach ($post->likes()->get() as $recipent) {
             if (($recipent->id != $post->user()->first()->id) 
                 && ($recipent->id != auth()->user()->id)) {
-                $emailService->email($recipent, $subject, 'emails.edited', 
-                ['resource' => $post, 'type' => "post", 'status' => "liked"]);
+                $emailService->email($recipent, $subject, 'emails.posts.edited', 
+                ['resource' => $post, 'oldResource' => $oldPost, 'oldImage' => $oldImage,
+                    'type' => "post", 'status' => "liked"]);
             }
         }
         foreach ($post->comments()->get() as $comment) {
             if (($comment->user()->first()->id != $post->user()->first()->id)
                 && ($comment->user()->first()->id != auth()->user()->id)) {
-                $emailService->email($comment->user()->first(), $subject, 'emails.edited', 
-                ['resource' => $post, 'type' => "post", 'status' => "commented on"]);
+                $emailService->email($comment->user()->first(), $subject, 'emails.posts.edited', 
+                ['resource' => $post, 'oldResource' => $oldPost, 'oldImage' => $oldImage, 
+                    'type' => "post", 'status' => "commented on"]);
             }    
         }
         if ($post->user()->first()->id != auth()->user()->id) {
-            $emailService->email($post->user()->first(), "Administrator Edit", 'emails.adminEdit', 
-                ['resource' => $post, 'type' => "posts", 'oldText' => $oldText]);
+            $emailService->email($post->user()->first(), "Administrator Edit", 'emails.posts.adminEdit', 
+                ['resource' => $post, 'oldResource' => $oldPost, 'oldImage' => $oldImage, 
+                    'type' => "posts"]);
         }
 
         return redirect()->route('posts.index');
@@ -208,7 +220,7 @@ class PostController extends Controller
         $recipent = $post->user()->first();
         $subject = "Post Interaction";
         if ($recipent->id != auth()->user()->id) {
-            $emailService->email($recipent, $subject, 'emails.liked', 
+            $emailService->email($recipent, $subject, 'emails.posts.liked', 
             ['resource' => $post, 'type' => "post", 'status' => $status,
             'user' => auth()->user()->name]);
         }
@@ -232,7 +244,7 @@ class PostController extends Controller
         foreach ($post->likes()->get() as $recipent) {
             if (($recipent->id != $post->user()->first()->id)
                 && ($recipent->id != auth()->user()->id)) {
-                $emailService->email($recipent, $subject, 'emails.deleted', 
+                $emailService->email($recipent, $subject, 'emails.posts.deleted', 
                 ['resource' => $post, 'type' => "post", 'status' => "liked"]);
             }
         }
@@ -240,13 +252,13 @@ class PostController extends Controller
             if (($comment->user()->first()->id != $post->user()->first()->id)
                 && ($comment->user()->first()->id != auth()->user()->id)) {
                 $emailService->email($comment->user()->first(), $subject, 
-                'emails.deleted', 
+                'emails.posts.deleted', 
                 ['resource' => $post, 'type' => "post", 'status' => "commented on"]);
             }    
         }
         if ($post->user()->first()->id != auth()->user()->id) {
             $emailService->email($post->user()->first(), "Administrator Delete", 
-                'emails.adminDelete', ['resource' => $post, 'type' => "posts"]);
+                'emails.posts.adminDelete', ['resource' => $post, 'type' => "posts"]);
         }
 
         

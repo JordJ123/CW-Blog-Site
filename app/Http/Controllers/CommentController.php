@@ -54,7 +54,8 @@ class CommentController extends Controller
         $recipent = Post::findOrFail($comment->post_id)->user()->first();
         $subject = "Posted Comment";
         if ($recipent->id != auth()->user()->id) {
-            $emailService->email($recipent, $subject, 'emails.comment', ['comment' => $comment]);
+            $emailService->email($recipent, $subject, 'emails.comments.comment', 
+                ['post' => Post::findOrFail($comment->post_id), 'comment' => $comment]);
         }
         return $comment;
 
@@ -98,7 +99,9 @@ class CommentController extends Controller
         ]);
 
         $comment = Comment::findOrFail($id);
-        $oldText = $comment->text;
+        $oldComment = new Comment;
+        $oldComment->text = $comment->text;
+        $oldComment->user_id = $comment->user_id;
         $comment->text = $validatedData['text'];
         $comment->save();
 
@@ -106,19 +109,22 @@ class CommentController extends Controller
         $subject = "Editted Comment";
         if (($recipent->id != $comment->user()->first()->id)
             && ($recipent->id != auth()->user()->id)) {
-            $emailService->email($recipent, $subject, 'emails.edited', 
-            ['resource' => $comment, 'type' => "comment", 'status' => "on your post"]);
+            $emailService->email($recipent, $subject, 'emails.comments.edited', 
+                ['resource' => $comment, 'oldResource' => $oldComment, 'type' => "comment", 
+                'status' => "on your post"]);
         }
         foreach ($comment->likes()->get() as $recipent) {
             if (($recipent->id != $comment->user()->first()->id)
                 && ($recipent->id != auth()->user()->id)) {
-                $emailService->email($recipent, $subject, 'emails.edited', 
-                ['resource' => $comment, 'type' => "comment", 'status' => "liked"]);
+                $emailService->email($recipent, $subject, 'emails.comments.edited', 
+                    ['resource' => $comment, 'oldResource' => $oldComment, 'type' => "comment", 
+                    'status' => "liked"]);
             }
         }
         if ($comment->user()->first()->id != auth()->user()->id) {
-            $emailService->email($comment->user()->first(), "Administrator Edit", 'emails.adminEdit', 
-                ['resource' => $comment, 'type' => "posts", 'oldText' => $oldText]);
+            $emailService->email($comment->user()->first(), "Administrator Edit", 
+                'emails.comments.adminEdit', 
+                ['resource' => $comment, 'oldResource' => $oldComment, 'type' => "posts"]);
         }
 
         return null;
@@ -148,7 +154,7 @@ class CommentController extends Controller
         $recipent = $comment->user()->first();
         $subject = "Comment Interaction";
         if ($recipent->id != auth()->user()->id) {
-            $emailService->email($recipent, $subject, 'emails.liked', 
+            $emailService->email($recipent, $subject, 'emails.comments.liked', 
                 ['resource' => $comment, 'type' => "comment", 'status' => $status,
                 'user' => auth()->user()->name]);
         }
@@ -172,19 +178,19 @@ class CommentController extends Controller
         $subject = "Deleted Comment";
         if (($recipent->id != $comment->user()->first()->id)
             && ($recipent->id != auth()->user()->id)) {
-            $emailService->email($recipent, $subject, 'emails.deleted', 
+            $emailService->email($recipent, $subject, 'emails.comments.deleted', 
             ['resource' => $comment, 'type' => "comment", 'status' => "on your post"]);
         }
         foreach ($comment->likes()->get() as $recipent) {
             if (($recipent->id != $comment->user()->first()->id)
                 && ($recipent->id != auth()->user()->id)) {
-                $emailService->email($recipent, $subject, 'emails.deleted', 
+                $emailService->email($recipent, $subject, 'emails.comments.deleted', 
                 ['resource' => $comment, 'type' => "comment", 'status' => "liked"]);
             }
         }
         if ($comment->user()->first()->id != auth()->user()->id) {
             $emailService->email($comment->user()->first(), "Administrator Delete", 
-                'emails.adminDelete', ['resource' => $comment, 'type' => "posts"]);
+                'emails.comments.adminDelete', ['resource' => $comment, 'type' => "posts"]);
         }
 
         $comment->delete();
