@@ -7,16 +7,16 @@
     <form method="POST" action="{{ route('password.email') }}">
         @csrf
         <div class="mb-3">
-            <label for="email" class="form-label text-secondary">Email address</label>
+            <label for="email" class="form-label text-secondary">Email Address</label>
             <input type="email" class="form-control" id="email" name="email" 
                 value="{{ old ('email') }}" maxlength="255" required>
         </div>
         <div class="text-center">
-            <button type="submit" class="btn btn-secondary">Email Password Link</button>
+            <button type="submit" class="text-primary btn btn-secondary">Email Password Link</button>
         </div>
         <div class="text-center">
-            <a class="btn link-dark " href="{{ route('login') }}">
-                Remembered your Password?</a>
+            <a class="btn link-secondary " href="{{ route('login') }}">
+                Remembered your password?</a>
         </div> 
     </form>
 

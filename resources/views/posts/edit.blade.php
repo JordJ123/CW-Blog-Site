@@ -1,5 +1,7 @@
 @extends('layouts.app')
 
+@section('title', 'Edit Post')
+
 @section('content')
 
     @if ($post->image()->first() != null)
@@ -13,7 +15,7 @@
     @endif  
 
     <div>
-        <h1 class="text-primary">Edit Post</h1>
+        <h1 class="text-primary">@yield('title')</h1>
         <form method="POST" action="{{ route('posts.update', ['id' => $post->id]) }}"
             enctype="multipart/form-data">
             @csrf
@@ -32,13 +34,13 @@
             </div>
             <div class="mb-3">
                 <label for="imageText" class="form-label text-primary">
-                    Image Alt Text (if post has image)</label>
+                    Image Alternate Text (displays if the image can not load)</label>
                 <input type="text" class="form-control" id="imageText" name="imageText" 
                     value="{{ $value }}" maxlength="255">
             </div>
             <div>
-                <button type="submit" class="text-secondary btn btn-primary">Update</button>
-                <a class="btn link-dark" href="{{ route('posts.index') }}">Cancel</a>
+                <button type="submit" class="text-secondary btn btn-primary me-2">Update</button>
+                <a class="link-primary" href="{{ route('posts.index') }}">Cancel</a>
             </div> 
         </form>
     </div>

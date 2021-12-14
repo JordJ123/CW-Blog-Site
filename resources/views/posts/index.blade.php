@@ -1,16 +1,14 @@
 @extends('layouts.app')
 
+@section('title', "Post Feed")
+
 @section('content')
 
     <div>
-        <h1 class="text-primary">Post Feed</h1>
+        <h1 class="text-primary">@yield('title')</h1>
         <a class="btn btn-primary text-secondary mb-3" href="{{ route('posts.create') }}">New Post</a>
     </div>   
     
-    @php
-        $end = min($page * 5, $posts->count());
-    @endphp
-
     <div style="background-color: #f2f2f2" class="border border-dark p-3 mb-3" v-for="post in posts">
         <p><b>
             @{{ post.name }}
@@ -54,7 +52,8 @@
     <div>
         <form method="POST" action="{{ route('logout') }}">
             @csrf
-            <button type="submit" class="text-secondary btn btn-danger">Logout</button>
+            <button type="submit" class="text-secondary btn btn-danger me-2">Logout</button>
+            Logged in as <b>{{ auth()->user()->name }}</b>
         </form>
     </div>
 
@@ -84,6 +83,7 @@
             data: {
                 isAdmin: {{ auth()->user()->isAdmin }},
                 posts: [],
+                tempPosts: [],
             },
             mounted() {
                 axios.get("{{ route('posts.indexJSON', ['page' => $page]) }}")
@@ -121,16 +121,23 @@
                         })
                         .catch(response => {console.log(response);})   
                 },
+                commentPost:function(post) {
+                    axios.post("{{ route('comments.store') }}", 
+                        {
+                            text:post.newComment,
+                            post_id:post.id
+                        })
+                        .then(response => {
+                            post.newComment = "";
+                            post.comments.push(response.data);
+                            tempPost = this.tempPosts.find(
+                                tempPost => tempPost.id == post.id);
+                            tempPost.comments.push(JSON.parse(JSON.stringify(response.data)));
+                        })
+                        .catch(response => {console.log(response);})  
+                },
                 commentEdit:function(post, comment) {
                     comment.isEdited = true;
-                },
-                commentCancel:function(post, comment) {
-                    comment.isEdited = false;
-                    tempP = this.tempPosts.find(
-                        tempPost => tempPost.id == post.id);
-                    tempC = tempP.comments.find(
-                        tempComment => tempComment.id == comment.id);
-                    comment.text = tempC.text;
                 },
                 commentUpdate:function(post, comment) {
                     axios.put("{{ route('comments.store') }}/" + comment.id, 
@@ -146,6 +153,14 @@
                             tempC.text = comment.text;
                         })
                         .catch(response => {console.log(response);})  
+                },
+                commentCancel:function(post, comment) {
+                    comment.isEdited = false;
+                    tempP = this.tempPosts.find(
+                        tempPost => tempPost.id == post.id);
+                    tempC = tempP.comments.find(
+                        tempComment => tempComment.id == comment.id);
+                    comment.text = tempC.text;
                 },
                 commentRemove:function(post, comment) {
                     axios.delete("{{ route('comments.store') }}/" + comment.id)
@@ -170,18 +185,6 @@
                         })
                         .catch(response => {console.log(response);})   
                 },
-                commentPost:function(post) {
-                    axios.post("{{ route('comments.store') }}", 
-                        {
-                            text:post.newComment,
-                            post_id:post.id
-                        })
-                        .then(response => {
-                            post.newComment = "";
-                            post.comments.push(response.data);
-                        })
-                        .catch(response => {console.log(response);})  
-                }
             }
         })    
     </script>            

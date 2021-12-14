@@ -20,7 +20,7 @@
                 name="password_confirmation" maxlength="15" required>
         </div>
         <div class="text-center">
-            <button type="submit" class="btn btn-secondary">Reset Password</button>
+            <button type="submit" class="text-primary btn btn-secondary">Reset Password</button>
         </div>  
     </form>
 
