@@ -72,6 +72,7 @@ class PostController extends Controller
         $post->text = $validatedData['text'];
         $post->user_id = auth()->user()->id;
 
+        $image = null;
         if ($request->hasFile('file')) {
             $imageData = $request->validate([
                 'file' => 'mimes:jpeg,bmp,png',
@@ -80,12 +81,14 @@ class PostController extends Controller
             $image = new Image;
             $image->path = $request->file->hashName();
             $image->text = $imageData['imageText'];
-            $image->post_id = $post->id;  
-            $image->save();
             $request->file->move(public_path('images'), $request->file->hashName());
         }
 
         $post->save();
+        if ($image != null) {
+            $image->post_id = $post->id;  
+            $image->save();
+        }
 
         return redirect()->route('posts.index');
 

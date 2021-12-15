@@ -20,7 +20,7 @@
             <label for="imageText" class="form-label text-primary">
                 Image Alternate Text (displays if the image can not load)</label>
             <input type="text" class="form-control" id="imageText" name="imageText" 
-                value="{{ old('imageText') }}" maxlength="255">
+                value="{{ old('imageText') }}" maxlength="255" required>
         </div>
         <div>
             <button type="submit" class="text-secondary btn btn-primary me-2">Create</button>
