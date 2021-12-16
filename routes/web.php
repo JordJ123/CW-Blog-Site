@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\EmailService;
 use App\Models\User;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\CommentController;
@@ -16,14 +15,6 @@ use App\Http\Controllers\CommentController;
 | contains the "web" middleware group. Now create something great!
 |
 */
-
-//Binding
-app()->singleton('App\EmailService', function($app) {
-    $sender = new User;
-    $sender->name = "Posts R Us";
-    $sender->email = "postsrus@email.com";
-    return new EmailService($sender);
-});
 
 //Home
 Route::get('/', function () {

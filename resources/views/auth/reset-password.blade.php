@@ -1,10 +1,13 @@
-@extends('layouts.account')
+@extends('layouts.app')
 
 @section('title', "Reset Password")
 
-@section('form')
+@section('content')
     
-    <form method="POST" action="{{ route('password.update') }}">
+  <div class="w-50 position-absolute top-50 start-50 translate-middle border border-dark bg-primary 
+      p-3">
+      <h1 class="text-secondary text-center">@yield('title')</h1>
+      <form method="POST" action="{{ route('password.update') }}">
         @csrf
         <input type="hidden" name="token" value="{{ $request->route('token') }}">
         <input type="hidden" name="email" value="{{ old('email', $request->email) }}">
@@ -23,5 +26,6 @@
             <button type="submit" class="text-primary btn btn-secondary">Reset Password</button>
         </div>  
     </form>
-
+  </div>
+    
 @endsection

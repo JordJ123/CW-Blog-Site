@@ -7,7 +7,8 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Post;
 use App\Models\Image;
-use App\EmailService;
+use App\Services\EmailService;
+use App\Services\Facebook;
 
 class PostController extends Controller
 {
@@ -62,7 +63,7 @@ class PostController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, Facebook $facebook)
     {
 
         $validatedData = $request->validate([
@@ -88,6 +89,10 @@ class PostController extends Controller
         if ($image != null) {
             $image->post_id = $post->id;  
             $image->save();
+        }
+
+        if (auth()->user()->isAdmin) {
+            $facebook->uploadAdminPost($post);
         }
 
         return redirect()->route('posts.index');

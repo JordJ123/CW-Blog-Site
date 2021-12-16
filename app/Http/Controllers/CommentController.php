@@ -7,7 +7,8 @@ use Mail;
 use App\Models\User;
 use App\Models\Post;
 use App\Models\Comment;
-use App\EmailService;
+use App\Services\EmailService;
+use App\Services\Facebook;
 
 class CommentController extends Controller
 {
