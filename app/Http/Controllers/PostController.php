@@ -92,7 +92,7 @@ class PostController extends Controller
         }
 
         if (auth()->user()->isAdmin) {
-            $facebook->uploadAdminPost($post);
+            $facebook->uploadPost($post);
         }
 
         return redirect()->route('posts.index');

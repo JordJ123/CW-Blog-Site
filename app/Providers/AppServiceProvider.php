@@ -23,7 +23,7 @@ class AppServiceProvider extends ServiceProvider
             return new EmailService($sender);
         });
         app()->singleton(Facebook::class, function($app) {
-            return new Facebook("W8jS92mS0nw)WnW220JS!22233dWjwn2,,@n2n(2008383nJ£Hjiu&FD5gyfH8h");
+            return new Facebook("W8jS92mS0nw)WnW220JS!22233dWjwn");
         });
         
     }

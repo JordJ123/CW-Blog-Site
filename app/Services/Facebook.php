@@ -12,7 +12,7 @@ class Facebook
         $this->apiKey = $apiKey;
     }
 
-    public function uploadAdminPost($post)
+    public function uploadPost(Post $post)
     {
         $imagePath = null;
         if ($post->image()->first() != null) {
